@@ -2,283 +2,555 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>john doe</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #0a0a0a;
-      --bg-card: #111111;
-      --bg-elevated: #161616;
-      --bg-hover: #1f1f1f;
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface-hover: #171717;
       --border: #262626;
       --border-light: #3a3a3a;
-      --text-main: #e5e5e5;
-      --text-muted: #a3a3a3;
-      --text-dim: #737373;
+      --text: #ededed;
+      --muted: #8a8a8a;
     }
 
     * {
       box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    body {
+    html, body {
       margin: 0;
       padding: 0;
-      background-color: var(--bg-base);
-      color: var(--text-main);
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--bg);
+      color: var(--text);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       overflow-x: hidden;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .mono {
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Hide native cursor when laser mode is active */
     body.laser-active,
-    body.laser-active button,
-    body.laser-active a {
-      cursor: none;
+    body.laser-active * {
+      cursor: none !important;
     }
 
-    /* Main container card */
-    .main-card {
-      background-color: var(--bg-card);
+    #bg-canvas,
+    #fg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: block;
+    }
+
+    /* Main Centered Card - margin-top reserves guaranteed space on mobile & desktop for the perched cat */
+    .card {
+      background-color: var(--surface);
       border: 1px solid var(--border);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 490px;
+      margin-top: 88px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+      transition: border-color 0.2s ease, transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
     }
 
-    .interactive-row {
-      background-color: #141414;
-      border: 1px solid var(--border);
-      transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+    .card:hover {
+      border-color: #303030;
     }
 
-    .interactive-row:hover {
-      background-color: var(--bg-hover);
-      border-color: var(--border-light);
+    /* Diagonal Berserk Sword Slice States */
+    .card.sliced-top {
+      clip-path: polygon(0% 0%, 100% 0%, 100% 34%, 0% 68%);
+      transform: translate(-16px, -12px) rotate(-3.2deg) !important;
+      border-color: #52525b;
     }
 
-    .interactive-row:active {
-      transform: translateY(1px);
+    .card-slice-bottom-clone {
+      position: fixed;
+      z-index: 11;
+      pointer-events: none;
+      margin: 0 !important;
+      clip-path: polygon(0% 68%, 100% 34%, 100% 100%, 0% 100%);
+      transition: transform 0.46s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      will-change: transform, opacity;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95);
     }
 
-    .btn-raw {
+    /* Tactile Monochrome Buttons */
+    .btn-mono {
       background-color: #161616;
       border: 1px solid var(--border);
-      color: var(--text-muted);
+      color: #bdbdbd;
+      padding: 6px 11px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.2;
       transition: all 0.12s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      touch-action: manipulation;
     }
 
-    .btn-raw:hover {
-      background-color: #222222;
-      color: var(--text-main);
+    .btn-mono:hover {
+      background-color: #202020;
       border-color: var(--border-light);
+      color: #ffffff;
     }
 
-    .btn-raw:active {
+    .btn-mono:active {
       transform: translateY(1px);
     }
 
-    .btn-raw.active {
-      background-color: #e5e5e5;
+    .btn-mono.active-toggle {
+      background-color: #e6e6e6;
+      border-color: #ffffff;
       color: #0a0a0a;
-      border-color: #e5e5e5;
-      font-weight: 500;
+      font-weight: 600;
+    }
+
+    .btn-danger {
+      background-color: #1f1f1f;
+      border: 1px solid #d4d4d4;
+      color: #ffffff;
+      animation: pulse-border 0.9s infinite alternate;
+    }
+
+    @keyframes pulse-border {
+      from { border-color: #525252; }
+      to { border-color: #ffffff; }
+    }
+
+    /* Handle Link Rows */
+    .handle-row {
+      display: grid;
+      grid-template-columns: 68px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background-color: #0d0d0d;
+      border: 1px solid #1c1c1c;
+      border-radius: 4px;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .handle-row:hover {
+      border-color: #2e2e2e;
+      background-color: #121212;
+    }
+
+    .tag-pill {
+      background-color: #151515;
+      border: 1px solid #242424;
+      color: #9e9e9e;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+
+    /* Status Indicator Pulse */
+    @keyframes subtle-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #d4d4d4;
+      border-radius: 50%;
+      display: inline-block;
+      animation: subtle-pulse 2.4s infinite ease-in-out;
+    }
+
+    /* Bottom Trash Drop-Zone */
+    #trash-zone {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(90px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 60;
+      background-color: #111111;
+      border: 1px solid #3f3f46;
+      color: #a1a1aa;
+      padding: 8px 16px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.92);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    #trash-zone.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #trash-zone.hover-target {
+      border-color: #ffffff;
+      background-color: #27272a;
+      color: #ffffff;
+      transform: translateX(-50%) translateY(0) scale(1.12);
+    }
+
+    #trash-lid {
+      transform-origin: 4px 5px;
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #trash-zone.hover-target #trash-lid {
+      transform: translate(-2px, -3px) rotate(-28deg);
+    }
+
+    @keyframes trash-rattle {
+      0%, 100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+      20% { transform: translateX(calc(-50% - 6px)) translateY(-2px) rotate(-8deg); }
+      40% { transform: translateX(calc(-50% + 6px)) translateY(1px) rotate(8deg); }
+      60% { transform: translateX(calc(-50% - 4px)) translateY(-1px) rotate(-5deg); }
+      80% { transform: translateX(calc(-50% + 4px)) translateY(1px) rotate(5deg); }
+    }
+
+    #trash-zone.rattling {
+      opacity: 1;
+      animation: trash-rattle 0.42s ease-in-out infinite;
+      border-color: #e4e4e7;
+      color: #e4e4e7;
+    }
+
+    /* Top-Right Command Line Interface */
+    #top-cli {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 55;
+      width: 270px;
+      max-width: calc(100vw - 24px);
+      background-color: rgba(14, 14, 14, 0.94);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      transition: border-color 0.15s ease;
+    }
+
+    #top-cli:focus-within {
+      border-color: #52525b;
+    }
+
+    #cli-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f2f2f2;
+      width: 100%;
+      font-size: 11.5px;
+    }
+
+    #cli-input::placeholder {
+      color: #525252;
     }
   </style>
 </head>
-<body class="p-4 sm:p-6 relative">
+<body class="p-4 sm:p-6 flex items-center justify-center relative">
 
-  <!-- Background ASCII/Dot Physics Canvas -->
-  <canvas id="bg-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+  <!-- Background ASCII / Dot Physics Grid Canvas (z-index: 1) -->
+  <canvas id="bg-canvas" style="z-index: 1;"></canvas>
 
-  <!-- Foreground Cat & Laser Overlay Canvas -->
-  <canvas id="cat-canvas" class="fixed inset-0 pointer-events-none z-30"></canvas>
+  <!-- Foreground Physics Canvas (z-index: 40, renders IN FRONT OF card so items are always visible on mobile) -->
+  <canvas id="fg-canvas" style="z-index: 40;"></canvas>
 
-  <!-- Centered Single-Screen Card -->
-  <main id="card-container" class="main-card w-full max-w-[490px] relative z-10 p-5 sm:p-6 flex flex-col gap-5 mt-8">
+  <!-- Top-Right Command Line (z-index: 55) -->
+  <aside id="top-cli" class="mono select-none">
+    <div class="flex items-center justify-between px-2.5 py-1.5 border-b border-[#1f1f1f] text-[10px] text-[#777]">
+      <div class="flex items-center gap-1.5">
+        <span id="cli-mode-dot" class="w-1.5 h-1.5 rounded-full bg-[#666]"></span>
+        <span>tty // cmd</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <button
+          id="cli-quick-nobreak"
+          type="button"
+          class="px-1.5 py-0.5 rounded bg-[#181818] border border-[#2a2a2a] text-[10px] text-[#aaa] hover:text-white hover:border-[#444] transition"
+          title="Toggle unbreakable card & stop cat from picking up items"
+        >nobreak</button>
+        <button
+          id="cli-help-btn"
+          type="button"
+          class="px-1.5 py-0.5 rounded bg-[#181818] border border-[#2a2a2a] text-[10px] text-[#777] hover:text-white hover:border-[#444] transition"
+          title="Show commands"
+        >?</button>
+      </div>
+    </div>
+    <form id="cli-form" class="flex items-center gap-1.5 px-2.5 py-1.5" autocomplete="off">
+      <span class="text-[#8a8a8a] text-xs shrink-0">&gt;</span>
+      <input
+        id="cli-input"
+        type="text"
+        class="mono"
+        placeholder="type 'nobreak' or 'help'"
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+      />
+    </form>
+    <div id="cli-output" class="px-2.5 pb-2 text-[10.5px] text-[#8a8a8a] leading-snug hidden border-t border-[#191919] pt-1.5 max-h-28 overflow-y-auto space-y-1"></div>
+  </aside>
 
+  <!-- Bottom Trash Drop-Zone (z-index: 60, slides up when dragging Cat, Death Note, Guts Sword, or Snack) -->
+  <div id="trash-zone" class="mono text-xs select-none" aria-hidden="true">
+    <svg width="16" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="overflow-visible shrink-0">
+      <path id="trash-lid" d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+      <line x1="10" y1="11" x2="10" y2="17"></line>
+      <line x1="14" y1="11" x2="14" y2="17"></line>
+    </svg>
+    <span id="trash-label">trash</span>
+  </div>
+
+  <!-- Death Note Execution / Redirect Terminal Overlay (z-index: 60) -->
+  <div id="redirect-overlay" class="fixed inset-0 bg-[#080808]/95 hidden flex-col items-center justify-center p-5 text-center mono" style="z-index: 60;">
+    <div class="max-w-sm w-full border border-[#2d2d2d] bg-[#111111] p-5 rounded shadow-2xl">
+      <div class="text-[11px] text-[#777] tracking-widest uppercase mb-2">// kira_execution_complete</div>
+      <div id="eliminated-target-text" class="text-sm text-[#f0f0f0] font-semibold mb-2 break-words"></div>
+      <p class="text-xs text-[#8a8a8a] leading-relaxed mb-4">
+        the cat wrote your name in the death note. redirecting you to your previous website...
+      </p>
+      <div class="flex items-center justify-center gap-2">
+        <button id="retry-redirect-btn" type="button" class="btn-mono">[ ↵ previous site ]</button>
+        <button id="respawn-btn" type="button" class="btn-mono">[ respawn on site ]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Centered Profile Card (z-index: 10) -->
+  <main id="profile-card" class="card p-5 sm:p-7">
     <!-- Top Header -->
-    <header class="flex items-start justify-between border-b border-[#262626] pb-4 gap-2">
-      <div>
-        <div class="flex items-center gap-2.5">
-          <h1 class="text-lg font-semibold tracking-tight text-[#e5e5e5] mono">john doe</h1>
-          <span class="w-1.5 h-1.5 rounded-full bg-[#737373] inline-block" title="status: online"></span>
-          <span class="text-[11px] mono text-[#737373] px-1.5 py-0.5 bg-[#181818] border border-[#262626]">idx.01</span>
+    <div class="flex flex-col gap-3 pb-4 border-b border-[#1f1f1f]">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="mono text-lg sm:text-xl font-semibold tracking-tight text-[#f2f2f2]">john doe</h1>
+            <span class="status-dot" title="active"></span>
+            <span class="mono text-[11px] text-[#666] border border-[#222] px-1.5 py-0.5 rounded">idx.01</span>
+          </div>
+          <p class="text-xs sm:text-sm text-[#8a8a8a] mt-1">
+            i write code, play roblox, and hang out with cats.
+          </p>
         </div>
-        <p class="text-xs text-[#a3a3a3] mt-1 leading-relaxed">
-          i write code, play roblox, and hang out with cats.
-        </p>
       </div>
 
-      <!-- Header Actions: Drop Snack & Laser Pointer Toggle -->
-      <div class="flex items-center gap-1.5 shrink-0">
-        <button onclick="feedCatFish()" class="btn-raw px-2.5 py-1.5 text-xs mono shrink-0" title="drop a snack for the cat">
-          [drop snack]
+      <!-- Interactive Controls Row -->
+      <div class="flex flex-wrap items-center gap-2 pt-0.5">
+        <button id="drop-snack-btn" type="button" class="btn-mono mono" title="Drop a snack or Shinigami apple">
+          <span>[drop snack]</span>
         </button>
-        <button id="laser-btn" onclick="toggleLaser()" class="btn-raw px-2.5 py-1.5 text-xs mono flex items-center gap-2 shrink-0" title="toggle laser pointer for the cat">
-          <span id="laser-dot-indicator" class="w-1.5 h-1.5 rounded-full bg-[#737373] transition-colors"></span>
-          <span id="laser-btn-text">laser: off</span>
+        <button id="laser-btn" type="button" class="btn-mono mono" title="Toggle laser pointer for the cat">
+          <span id="laser-dot" class="w-1.5 h-1.5 rounded-full bg-[#666]"></span>
+          <span id="laser-label">laser: off</span>
+        </button>
+        <button id="spare-me-btn" type="button" class="btn-mono btn-danger mono hidden" title="Stop the cat from writing your name">
+          <span>[spare me / cancel]</span>
         </button>
       </div>
-    </header>
+    </div>
 
-    <!-- About / What I Do -->
-    <section class="space-y-2.5">
-      <div class="flex items-center justify-between text-[11px] mono text-[#737373]">
-        <span>// info</span>
-        <span>loc: local</span>
+    <!-- Bio / About Section -->
+    <div class="py-4 border-b border-[#1f1f1f] text-xs sm:text-sm leading-relaxed text-[#b8b8b8] space-y-2.5">
+      <div class="flex items-center justify-between">
+        <span class="mono text-[11px] text-[#666] uppercase tracking-wider">// info</span>
+        <span class="mono text-[11px] text-[#555]">loc: local</span>
       </div>
-      <p class="text-xs sm:text-[13px] text-[#a3a3a3] leading-relaxed">
+      <p>
         yah this is my website, im tajik and im level 9999 opsec like mr robot no cap
       </p>
-      <div class="flex flex-wrap gap-1.5 pt-1 mono text-[11px] text-[#a3a3a3]">
-        <span class="px-2 py-0.5 bg-[#161616] border border-[#262626]">tajik</span>
-        <span class="px-2 py-0.5 bg-[#161616] border border-[#262626]">coding</span>
-        <span class="px-2 py-0.5 bg-[#161616] border border-[#262626]">cats</span>
-        <span class="px-2 py-0.5 bg-[#161616] border border-[#262626]">roblox</span>
-        <span class="px-2 py-0.5 bg-[#161616] border border-[#262626]">opsec</span>
+      <div class="flex flex-wrap gap-1.5 pt-1 mono">
+        <span class="tag-pill">coding</span>
+        <span class="tag-pill">cats</span>
+        <span class="tag-pill">tajik</span>
+        <span class="tag-pill">roblox</span>
+        <span class="tag-pill">opsec</span>
       </div>
-    </section>
+    </div>
 
-    <!-- Tactile Social Links (Discord & Roblox) -->
-    <section class="space-y-2">
-      <div class="text-[11px] mono text-[#737373]">// links</div>
+    <!-- Network Handles / Links -->
+    <div class="py-4 space-y-2.5">
+      <div class="mono text-[11px] text-[#666] uppercase tracking-wider mb-2">// network_handles</div>
 
       <!-- Discord Row -->
-      <div onclick="copyHandle('yusufissuperdupercool.', 'discord-status')" 
-           class="interactive-row p-3 cursor-pointer flex items-center justify-between gap-2">
-        <div class="flex items-center gap-3 min-w-0">
-          <span class="text-xs mono text-[#737373] w-14 shrink-0">discord</span>
-          <span class="text-xs sm:text-sm mono text-[#e5e5e5] truncate">yusufissuperdupercool.</span>
+      <div class="handle-row">
+        <span class="mono text-xs text-[#707070]">discord</span>
+        <span class="mono text-xs sm:text-sm text-[#e2e2e2] truncate">yusufissuperdupercool.</span>
+        <div class="flex items-center justify-end gap-1.5 shrink-0">
+          <button
+            type="button"
+            class="btn-mono mono"
+            onclick="copyText('yusufissuperdupercool.', this)"
+          >
+            [copy]
+          </button>
         </div>
-        <span id="discord-status" class="text-[11px] mono text-[#737373] shrink-0 px-1.5 py-0.5 bg-[#0d0d0d] border border-[#262626]">
-          [copy]
-        </span>
       </div>
 
       <!-- Roblox Row -->
-      <div class="interactive-row p-3 flex items-center justify-between gap-2">
-        <a href="https://www.roblox.com/users/11354279932/profile" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer">
-          <span class="text-xs mono text-[#737373] w-14 shrink-0">roblox</span>
-          <span class="text-xs sm:text-sm mono text-[#e5e5e5] hover:underline truncate">yusufissinister</span>
-        </a>
-        <div class="flex items-center gap-1.5 shrink-0">
-          <button onclick="copyHandle('yusufissinister', 'roblox-status')" id="roblox-status" class="text-[11px] mono text-[#737373] hover:text-[#e5e5e5] px-1.5 py-0.5 bg-[#0d0d0d] border border-[#262626] transition">
+      <div class="handle-row">
+        <span class="mono text-xs text-[#707070]">roblox</span>
+        <a
+          href="https://www.roblox.com/users/11354279932/profile"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mono text-xs sm:text-sm text-[#e2e2e2] hover:underline truncate"
+        >yusufissinister</a>
+        <div class="flex items-center justify-end gap-1.5 shrink-0">
+          <button
+            type="button"
+            class="btn-mono mono"
+            onclick="copyText('yusufissinister', this)"
+          >
             [copy]
           </button>
-          <a href="https://www.roblox.com/users/11354279932/profile" target="_blank" rel="noopener noreferrer" 
-             class="text-[11px] mono text-[#a3a3a3] hover:text-[#e5e5e5] px-1.5 py-0.5 bg-[#0d0d0d] border border-[#262626] hover:border-[#404040] transition">
+          <a
+            href="https://www.roblox.com/users/11354279932/profile"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-mono mono no-underline"
+          >
             [open ↗]
           </a>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Minimal Footer / Status Bar -->
-    <footer class="border-t border-[#262626] pt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] mono text-[#737373]">
-      <div class="flex items-center gap-2">
-        <span id="status-dot" class="w-1.5 h-1.5 bg-[#a3a3a3] inline-block rounded-full"></span>
-        <span id="cat-state-label">cat: perched</span>
-      </div>
-      <div class="flex items-center gap-2.5">
-        <button onclick="petCat()" class="hover:text-[#e5e5e5] transition" title="click the cat or here to pet">
-          <span id="pet-count-label">pets: 0</span>
-        </button>
-        <span>•</span>
-        <button onclick="toggleAudio()" id="audio-btn" class="hover:text-[#e5e5e5] transition">
-          sfx: on
-        </button>
-        <span>•</span>
-        <span id="clock-label">00:00:00</span>
-      </div>
-    </footer>
-
+    <!-- Footer Status Bar -->
+    <div class="pt-3 border-t border-[#1c1c1c] flex items-center justify-between gap-2 mono text-[11px] text-[#666]">
+      <span id="cat-state-label" class="text-[#8a8a8a]">● cat: perched</span>
+      <span>xy: <span id="coords-label">000, 000</span></span>
+    </div>
   </main>
 
   <script>
     /* =========================================================================
-       STATE & CONFIGURATION
+       1. CLIPBOARD COPY HELPER (IFRAME SAFE)
        ========================================================================= */
-    const state = {
-      mouseX: window.innerWidth / 2,
-      mouseY: window.innerHeight / 2 - 120,
-      laserActive: false,
-      sfxEnabled: true,
-      catSpeedMultiplier: 1.0,
-      gridRadius: 120,
-      petCount: 0,
-      snacks: []
-    };
+    function copyText(text, btnElement) {
+      const originalLabel = btnElement.textContent.trim();
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
+        btnElement.textContent = '[copied]';
+        btnElement.style.color = '#ffffff';
+        btnElement.style.borderColor = '#555555';
+        playClickTick(560);
+      } catch (err) {
+        btnElement.textContent = '[err]';
+      }
+
+      document.body.removeChild(textArea);
+
+      setTimeout(() => {
+        btnElement.textContent = originalLabel;
+        btnElement.style.color = '';
+        btnElement.style.borderColor = '';
+      }, 1300);
+    }
 
     /* =========================================================================
-       MINIMAL WEB AUDIO SYNTH (NO EXTERNAL FILES)
+       2. SUBTLE SYNTHESIZED SOUND EFFECTS (WEB AUDIO API)
        ========================================================================= */
+    const state = {
+      mouseX: typeof window !== 'undefined' ? window.innerWidth / 2 : 200,
+      mouseY: typeof window !== 'undefined' ? window.innerHeight / 2 : 200,
+      prevMouseX: 200,
+      prevMouseY: 200,
+      mouseActive: false,
+      laserMode: false,
+      sfxEnabled: true,
+      catAgility: 6,
+      gridForce: 85,
+      ripples: [],
+      snacks: [],
+      deathNotes: [],
+      paperPages: [],
+      draggedNote: null,
+      dragItem: null,
+      trashHover: false,
+      floatingTexts: [],
+      cancelButtonBounds: null,
+      screenFlashAlpha: 0,
+      redirectTriggered: false,
+      gutsSword: null,
+      slashBeams: [],
+      sparks: [],
+      cardSliced: false,
+      unbreakableMode: false,
+      screenShake: 0,
+      lastRandomEvent: null,
+      randomEventTimer: null
+    };
+
     let audioCtx = null;
+
     function getAudio() {
       if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContext();
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
       }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
       return audioCtx;
     }
 
-    function playClickTick(freq = 180) {
+    function playClickTick(freq = 320) {
       if (!state.sfxEnabled) return;
       try {
         const ctx = getAudio();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.045);
-        gain.gain.setValueAtTime(0.06, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.05);
-      } catch (e) {}
-    }
-
-    function playPurrSynth() {
-      if (!state.sfxEnabled) return;
-      try {
-        const ctx = getAudio();
+        if (!ctx) return;
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(28, now);
-        osc.frequency.linearRampToValueAtTime(34, now + 0.18);
-        osc.frequency.linearRampToValueAtTime(26, now + 0.35);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.045);
 
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.linearRampToValueAtTime(0.04, now + 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.38);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
 
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.value = 140;
-
-        osc.connect(filter);
-        filter.connect(gain);
+        osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now);
-        osc.stop(now + 0.4);
+        osc.stop(now + 0.05);
       } catch (e) {}
     }
 
@@ -286,16 +558,19 @@
       if (!state.sfxEnabled) return;
       try {
         const ctx = getAudio();
+        if (!ctx) return;
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(380, now);
-        osc.frequency.exponentialRampToValueAtTime(620, now + 0.09);
-        osc.frequency.exponentialRampToValueAtTime(440, now + 0.18);
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(690, now + 0.09);
+        osc.frequency.exponentialRampToValueAtTime(480, now + 0.18);
 
-        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.055, now + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now);
@@ -303,184 +578,941 @@
       } catch (e) {}
     }
 
+    function playNotebookThud(intensity = 1) {
+      if (!state.sfxEnabled) return;
+      try {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(115 * intensity, now);
+        osc.frequency.exponentialRampToValueAtTime(28, now + 0.15);
+
+        gain.gain.setValueAtTime(Math.min(0.14, 0.08 * intensity), now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.17);
+      } catch (e) {}
+    }
+
+    function playPenScratch() {
+      if (!state.sfxEnabled) return;
+      try {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        const baseFreq = 900 + Math.random() * 650;
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(280, now + 0.025);
+
+        gain.gain.setValueAtTime(0.018, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.028);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.03);
+      } catch (e) {}
+    }
+
+    function playDeathNoteEliminationChime() {
+      if (!state.sfxEnabled) return;
+      try {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const freqs = [110, 164.81, 233.08, 329.63];
+        freqs.forEach((f) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(f, now);
+          osc.frequency.exponentialRampToValueAtTime(f * 0.96, now + 0.75);
+
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.038, now + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.78);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.8);
+        });
+      } catch (e) {}
+    }
+
+    function playBerserkClang() {
+      if (!state.sfxEnabled) return;
+      try {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const freqs = [208, 312, 478, 635, 912, 1340];
+        freqs.forEach((f, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = idx % 2 === 0 ? 'square' : 'sawtooth';
+          osc.frequency.setValueAtTime(f, now);
+          osc.frequency.exponentialRampToValueAtTime(f * 0.86, now + 0.65);
+
+          gain.gain.setValueAtTime(0.042 / (idx * 0.5 + 1), now);
+          gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.68);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.7);
+        });
+        playNotebookThud(1.7);
+      } catch (e) {}
+    }
+
+    function playSwordSlashSound() {
+      if (!state.sfxEnabled) return;
+      try {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(55, now + 0.26);
+
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.29);
+
+        playBerserkClang();
+      } catch (e) {}
+    }
+
+    function playTrashSound(metallic = false) {
+      if (!state.sfxEnabled) return;
+      try {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const freqs = metallic ? [320, 510, 190, 790] : [180, 125, 90, 240];
+        freqs.forEach((f, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+          osc.frequency.setValueAtTime(f, now + idx * 0.035);
+          osc.frequency.exponentialRampToValueAtTime(38, now + idx * 0.035 + 0.11);
+          gain.gain.setValueAtTime(0.055, now + idx * 0.035);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.035 + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.035);
+          osc.stop(now + idx * 0.035 + 0.13);
+        });
+      } catch (e) {}
+    }
+
     /* =========================================================================
-       1. BACKGROUND ASCII / DOT PHYSICS GRID
+       BOTTOM TRASH ZONE UI & DROP HANDLER
+       ========================================================================= */
+    const trashZoneEl = document.getElementById('trash-zone');
+    const trashLabelEl = document.getElementById('trash-label');
+
+    function getTrashCenter() {
+      const W = window.innerWidth || 360;
+      const H = window.innerHeight || 640;
+      return { x: W / 2, y: H - 46 };
+    }
+
+    function isNearTrashZone(x, y) {
+      const tc = getTrashCenter();
+      return Math.hypot(x - tc.x, y - tc.y) < 68;
+    }
+
+    function updateTrashZoneUI(activeDrag, nearTrash) {
+      if (!trashZoneEl || !trashLabelEl) return;
+      state.trashHover = Boolean(activeDrag && nearTrash);
+
+      if (activeDrag) {
+        trashZoneEl.classList.add('visible');
+        if (nearTrash) {
+          trashZoneEl.classList.add('hover-target');
+          trashLabelEl.textContent = '[ release to delete ]';
+        } else {
+          trashZoneEl.classList.remove('hover-target');
+          trashLabelEl.textContent = 'trash';
+        }
+      } else {
+        trashZoneEl.classList.remove('hover-target');
+        if (!cat.inTrash) {
+          trashZoneEl.classList.remove('visible');
+        }
+        trashLabelEl.textContent = 'trash';
+      }
+    }
+
+    function handleTrashDrop(dragItem) {
+      const tc = getTrashCenter();
+      spawnRipple(tc.x, tc.y, 22);
+
+      if (dragItem.type === 'note') {
+        const note = dragItem.ref;
+        const idx = state.deathNotes.indexOf(note);
+        if (idx !== -1) state.deathNotes.splice(idx, 1);
+        note.cancelled = true;
+        note.isOpen = false;
+        if (cat.targetNote === note) {
+          cat.targetNote = null;
+          if (cat.mode === 'running_to_note' || cat.mode === 'writing_note') {
+            cat.mode = 'returning';
+          }
+        }
+        state.draggedNote = null;
+        state.cancelButtonBounds = null;
+        updateSpareButtonVisibility();
+        spawnFlutterPages(tc.x, tc.y - 12, 5);
+        playTrashSound(false);
+        spawnFloatingText(tc.x, tc.y - 42, 'death note trashed (you survived)');
+      } else if (dragItem.type === 'sword') {
+        state.gutsSword = null;
+        cat.isGuts = false;
+        if (cat.mode === 'running_to_sword' || cat.mode === 'guts_charging' || cat.mode === 'guts_slashing') {
+          cat.mode = 'returning';
+        }
+        spawnSparks(tc.x, tc.y - 10, 14, 5.5);
+        playTrashSound(true);
+        spawnFloatingText(tc.x, tc.y - 42, 'dragon slayer trashed');
+      } else if (dragItem.type === 'snack') {
+        const idx = state.snacks.indexOf(dragItem.ref);
+        if (idx !== -1) state.snacks.splice(idx, 1);
+        playTrashSound(false);
+        spawnFloatingText(tc.x, tc.y - 42, 'snack trashed');
+      } else if (dragItem.type === 'cat') {
+        // Toss the cat into the trash bin!
+        cat.inTrash = true;
+        cat.isGuts = false;
+        state.gutsSword = null;
+        state.deathNotes.forEach((n) => {
+          if (!n.written) {
+            n.cancelled = true;
+            n.isOpen = false;
+            n.writingProgress = 0;
+          }
+        });
+        cat.targetNote = null;
+        state.cancelButtonBounds = null;
+        updateSpareButtonVisibility();
+
+        const statusLabel = document.getElementById('cat-state-label');
+        if (statusLabel) statusLabel.textContent = '● cat: in trash bin 💀';
+
+        playTrashSound(true);
+        spawnFloatingText(tc.x, tc.y - 44, 'trashed the cat 💀');
+
+        if (trashZoneEl && trashLabelEl) {
+          trashZoneEl.classList.remove('hover-target');
+          trashZoneEl.classList.add('visible', 'rattling');
+          trashLabelEl.textContent = '[ *muffled meow* ]';
+        }
+
+        clearTimeout(cat.trashTimer);
+        cat.trashTimer = setTimeout(() => {
+          cat.inTrash = false;
+          if (trashZoneEl && trashLabelEl) {
+            trashZoneEl.classList.remove('rattling');
+            if (!state.dragItem) {
+              trashZoneEl.classList.remove('visible');
+            }
+            trashLabelEl.textContent = 'trash';
+          }
+          const popCenter = getTrashCenter();
+          cat.x = popCenter.x;
+          cat.y = popCenter.y - 16;
+          cat.vx = (Math.random() - 0.5) * 4;
+          cat.vy = -9;
+          cat.mode = 'returning';
+          cat.stretchFactor = 1.1;
+          playSoftChirp();
+          spawnRipple(popCenter.x, popCenter.y - 10, 18);
+          spawnFloatingText(popCenter.x, popCenter.y - 54, 'cannot delete cat.exe');
+        }, 2200);
+      }
+    }
+
+    /* =========================================================================
+       CARD SLICE IN HALF & REPAIR MECHANIC (BERSERK DRAGON SLAYER)
+       ========================================================================= */
+    let cardBottomClone = null;
+    let cardSliceRepairTimer = null;
+
+    function sliceCardInHalf() {
+      const cardEl = document.getElementById('profile-card');
+      if (!cardEl || state.cardSliced) return;
+
+      if (state.unbreakableMode) {
+        const rect = cardEl.getBoundingClientRect();
+        playBerserkClang();
+        spawnSparks(rect.left + rect.width / 2, rect.top + rect.height / 2, 16, 5.5);
+        spawnFloatingText(rect.left + rect.width / 2, rect.top + 24, 'CARD UNBREAKABLE [nobreak: ON]');
+        return;
+      }
+
+      state.cardSliced = true;
+
+      const rect = cardEl.getBoundingClientRect();
+
+      if (cardBottomClone) {
+        cardBottomClone.remove();
+        cardBottomClone = null;
+      }
+
+      cardBottomClone = cardEl.cloneNode(true);
+      cardBottomClone.removeAttribute('id');
+      cardBottomClone.classList.remove('sliced-top');
+      cardBottomClone.classList.add('card-slice-bottom-clone');
+      cardBottomClone.style.left = rect.left + 'px';
+      cardBottomClone.style.top = rect.top + 'px';
+      cardBottomClone.style.width = rect.width + 'px';
+      cardBottomClone.style.height = rect.height + 'px';
+      cardBottomClone.style.transform = 'translate(0px, 0px) rotate(0deg)';
+      document.body.appendChild(cardBottomClone);
+
+      cardEl.classList.add('sliced-top');
+
+      requestAnimationFrame(() => {
+        if (cardBottomClone) {
+          cardBottomClone.style.transform = 'translate(18px, 16px) rotate(3.4deg)';
+        }
+      });
+
+      const x1 = rect.left - 24;
+      const y1 = rect.top + rect.height * 0.68;
+      const x2 = rect.right + 24;
+      const y2 = rect.top + rect.height * 0.34;
+      state.slashBeams.push({
+        x1,
+        y1,
+        x2,
+        y2,
+        alpha: 1.0,
+        width: 14
+      });
+
+      for (let i = 0; i <= 14; i++) {
+        const t = i / 14;
+        const sx = x1 + (x2 - x1) * t;
+        const sy = y1 + (y2 - y1) * t;
+        spawnSparks(sx, sy, 3, 6.5);
+      }
+
+      state.screenFlashAlpha = 0.72;
+      state.screenShake = 16;
+      playSwordSlashSound();
+      spawnRipple((x1 + x2) / 2, (y1 + y2) / 2, 34);
+      spawnFloatingText((x1 + x2) / 2, (y1 + y2) / 2 - 22, 'SLASHED IN HALF!! // DRAGON SLAYER');
+
+      clearTimeout(cardSliceRepairTimer);
+      cardSliceRepairTimer = setTimeout(() => {
+        repairSlicedCard();
+      }, 4500);
+    }
+
+    function repairSlicedCard() {
+      const cardEl = document.getElementById('profile-card');
+      if (!cardEl || !state.cardSliced) return;
+
+      cardEl.classList.remove('sliced-top');
+      if (cardBottomClone) {
+        cardBottomClone.style.transform = 'translate(0px, 0px) rotate(0deg)';
+        cardBottomClone.style.opacity = '0';
+        const cloneToRemove = cardBottomClone;
+        cardBottomClone = null;
+        setTimeout(() => {
+          cloneToRemove.remove();
+        }, 380);
+      }
+
+      state.cardSliced = false;
+      playClickTick(420);
+      const rect = cardEl.getBoundingClientRect();
+      spawnFloatingText(rect.left + rect.width / 2, rect.top + 30, '// card_repaired');
+    }
+
+    function spawnSparks(x, y, count = 12, speed = 5) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = (0.35 + Math.random() * 0.85) * speed;
+        state.sparks.push({
+          x,
+          y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd - 1.5,
+          len: 5 + Math.random() * 9,
+          life: 1.0,
+          decay: 0.024 + Math.random() * 0.025
+        });
+      }
+    }
+
+    /* =========================================================================
+       3. DUAL CANVAS SETUP (BG GRID + FG CAT & ANIME ARTIFACTS)
        ========================================================================= */
     const bgCanvas = document.getElementById('bg-canvas');
     const bgCtx = bgCanvas.getContext('2d');
+    const fgCanvas = document.getElementById('fg-canvas');
+    const fgCtx = fgCanvas.getContext('2d');
+    const cardEl = document.getElementById('profile-card');
+    const spareBtnEl = document.getElementById('spare-me-btn');
+
     let gridPoints = [];
-    let ripples = [];
     const GRID_SPACING = 28;
 
-    function initGrid() {
-      bgCanvas.width = window.innerWidth;
-      bgCanvas.height = window.innerHeight;
-      gridPoints = [];
+    function getPoint(e) {
+      let x = state.mouseX;
+      let y = state.mouseY;
+      if (e) {
+        if (e.touches && e.touches.length > 0) {
+          x = e.touches[0].clientX;
+          y = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+          x = e.changedTouches[0].clientX;
+          y = e.changedTouches[0].clientY;
+        } else if (typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+          x = e.clientX;
+          y = e.clientY;
+        }
+      }
+      if (!Number.isFinite(x)) x = window.innerWidth / 2 || 200;
+      if (!Number.isFinite(y)) y = window.innerHeight / 2 || 200;
+      return { x, y };
+    }
 
-      const cols = Math.ceil(bgCanvas.width / GRID_SPACING) + 1;
-      const rows = Math.ceil(bgCanvas.height / GRID_SPACING) + 1;
+    function initGrid() {
+      const dpr = window.devicePixelRatio || 1;
+      const W = document.documentElement.clientWidth || window.innerWidth || 360;
+      const H = document.documentElement.clientHeight || window.innerHeight || 640;
+
+      bgCanvas.style.width = W + 'px';
+      bgCanvas.style.height = H + 'px';
+      bgCanvas.width = Math.round(W * dpr);
+      bgCanvas.height = Math.round(H * dpr);
+      bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      fgCanvas.style.width = W + 'px';
+      fgCanvas.style.height = H + 'px';
+      fgCanvas.width = Math.round(W * dpr);
+      fgCanvas.height = Math.round(H * dpr);
+      fgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      gridPoints = [];
+      const cols = Math.ceil(W / GRID_SPACING) + 1;
+      const rows = Math.ceil(H / GRID_SPACING) + 1;
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const ox = c * GRID_SPACING;
           const oy = r * GRID_SPACING;
           gridPoints.push({
-            ox, oy,
-            x: ox, y: oy,
-            vx: 0, vy: 0
+            ox,
+            oy,
+            x: ox,
+            y: oy,
+            vx: 0,
+            vy: 0
           });
         }
       }
     }
 
-    function spawnRipple(x, y, strength = 12) {
-      ripples.push({
-        x, y,
-        radius: 0,
-        maxRadius: Math.max(window.innerWidth, window.innerHeight) * 0.45,
-        strength
+    function spawnRipple(x, y, power = 16) {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+      state.ripples.push({
+        x,
+        y,
+        radius: 5,
+        maxRadius: 240,
+        strength: power
       });
     }
 
-    function updateAndDrawGrid() {
-      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-      bgCtx.font = '11px "JetBrains Mono", monospace';
-      bgCtx.textAlign = 'center';
-      bgCtx.textBaseline = 'middle';
+    function spawnFloatingText(x, y, text) {
+      const W = window.innerWidth || 360;
+      const H = window.innerHeight || 640;
+      const safeX = Number.isFinite(x) ? Math.max(85, Math.min(W - 85, x)) : W / 2;
+      const safeY = Number.isFinite(y) ? Math.max(36, Math.min(H - 36, y)) : 90;
+      state.floatingTexts.push({
+        x: safeX,
+        y: safeY,
+        text,
+        alpha: 1,
+        vy: -0.65
+      });
+    }
 
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        ripples[i].radius += 9;
-        if (ripples[i].radius > ripples[i].maxRadius) {
-          ripples.splice(i, 1);
+    function spawnFlutterPages(x, y, count = 4) {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+      for (let i = 0; i < count; i++) {
+        state.paperPages.push({
+          x: x + (Math.random() - 0.5) * 20,
+          y: y - 5,
+          vx: (Math.random() - 0.5) * 4.2,
+          vy: -1.8 - Math.random() * 2.5,
+          angle: Math.random() * Math.PI * 2,
+          vAngle: (Math.random() - 0.5) * 0.12,
+          swaySeed: Math.random() * 10,
+          alpha: 0.95
+        });
+      }
+    }
+
+    /* =========================================================================
+       VISITOR IDENTITY DETECTION & REDIRECT EXECUTION
+       ========================================================================= */
+    function getVisitorTargetName() {
+      try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'LOCAL_NODE';
+        const city = tz.split('/').pop().replace(/_/g, ' ');
+        const ua = navigator.userAgent || '';
+        let dev = 'VISITOR';
+        if (/iPhone/i.test(ua)) dev = 'iPhone';
+        else if (/iPad/i.test(ua)) dev = 'iPad';
+        else if (/Android/i.test(ua)) dev = 'Android';
+        else if (/Macintosh/i.test(ua)) dev = 'Mac';
+        else if (/Windows/i.test(ua)) dev = 'Windows';
+        return `YOU [${dev} // ${city}]`;
+      } catch (e) {
+        return 'VISITOR [OPSEC_TARGET]';
+      }
+    }
+
+    function updateSpareButtonVisibility() {
+      if (!spareBtnEl) return;
+      const hasActiveThreat = state.deathNotes.some((n) => !n.written && !n.cancelled);
+      if (hasActiveThreat && !state.redirectTriggered) {
+        spareBtnEl.classList.remove('hidden');
+      } else {
+        spareBtnEl.classList.add('hidden');
+      }
+    }
+
+    function cancelCatWriting(note) {
+      const target = note || cat.targetNote || state.deathNotes.find((n) => !n.written && !n.cancelled);
+      if (target) {
+        target.cancelled = true;
+        target.isOpen = false;
+        target.writingProgress = 0;
+        target.vy = -5.5;
+        target.vx = (Math.random() - 0.5) * 6;
+        spawnFlutterPages(target.x, target.y, 4);
+      }
+      cat.targetNote = null;
+      cat.mode = 'returning';
+      state.cancelButtonBounds = null;
+      updateSpareButtonVisibility();
+      playClickTick(520);
+      spawnFloatingText(cat.x, cat.y - 34, 'spared! cat closed the death note');
+    }
+
+    function executeDeathNoteRedirect(targetName) {
+      if (state.redirectTriggered) return;
+      state.redirectTriggered = true;
+      updateSpareButtonVisibility();
+
+      playDeathNoteEliminationChime();
+      state.screenFlashAlpha = 0.92;
+      spawnFloatingText(cat.x, cat.y - 46, 'ELIMINATED // REDIRECTING...');
+
+      const statusLabel = document.getElementById('cat-state-label');
+      if (statusLabel) statusLabel.textContent = '● cat: target eliminated (kira)';
+
+      setTimeout(() => {
+        const ref = document.referrer;
+        try {
+          if (window.history.length > 1) {
+            window.history.back();
+          }
+        } catch (e) {}
+
+        setTimeout(() => {
+          try {
+            window.history.go(-1);
+          } catch (e) {}
+        }, 180);
+
+        setTimeout(() => {
+          if (ref && ref !== window.location.href) {
+            try {
+              window.location.replace(ref);
+              return;
+            } catch (e) {}
+          }
+          const overlay = document.getElementById('redirect-overlay');
+          const targetEl = document.getElementById('eliminated-target-text');
+          if (targetEl) {
+            targetEl.textContent = `target: "${targetName}"`;
+          }
+          if (overlay) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+          }
+        }, 480);
+      }, 650);
+    }
+
+    /* =========================================================================
+       DEATH NOTE DROP & BERSERK GUTS SWORD DROP
+       ========================================================================= */
+    function getLedgeY() {
+      const cardRect = cardEl.getBoundingClientRect();
+      return Math.round(cardRect.top);
+    }
+
+    function dropDeathNote() {
+      const W = document.documentElement.clientWidth || window.innerWidth || 360;
+      const cardRect = cardEl.getBoundingClientRect();
+      const perchY = getLedgeY();
+
+      const cardCenterX = cardRect.left + cardRect.width / 2;
+      const dropOnRight = cat.x <= cardCenterX;
+      const minX = Math.max(48, cardRect.left + 36);
+      const maxX = Math.min(W - 48, cardRect.right - 36);
+
+      let spawnX = dropOnRight
+        ? cardCenterX + Math.random() * Math.max(24, maxX - cardCenterX)
+        : minX + Math.random() * Math.max(24, cardCenterX - minX);
+
+      if (!Number.isFinite(spawnX)) spawnX = W / 2;
+
+      if (state.deathNotes.length >= 2) {
+        state.deathNotes.shift();
+      }
+
+      const note = {
+        x: spawnX,
+        y: -40,
+        vx: (Math.random() - 0.5) * 1.6,
+        vy: 3.8 + Math.random() * 1.5,
+        angle: (Math.random() - 0.5) * 0.5,
+        vAngle: (Math.random() - 0.5) * 0.08,
+        w: 48,
+        h: 62,
+        targetY: perchY,
+        bounces: 0,
+        rested: false,
+        isOpen: false,
+        written: false,
+        cancelled: false,
+        writingProgress: 0,
+        targetName: getVisitorTargetName(),
+        causeText: 'sent back to previous site'
+      };
+
+      state.deathNotes.push(note);
+      updateSpareButtonVisibility();
+      playClickTick(220);
+      spawnFloatingText(spawnX, Math.max(48, perchY - 56), 'death note dropped');
+    }
+
+    function dropGutsSword() {
+      if (state.gutsSword && state.dragItem && state.dragItem.type === 'sword') return;
+      const W = document.documentElement.clientWidth || window.innerWidth || 360;
+      const cardRect = cardEl.getBoundingClientRect();
+      const perchY = getLedgeY();
+
+      const cardCenterX = cardRect.left + cardRect.width / 2;
+      const dropOnRight = cat.x <= cardCenterX;
+      const minX = Math.max(54, cardRect.left + 44);
+      const maxX = Math.min(W - 54, cardRect.right - 44);
+
+      let spawnX = dropOnRight
+        ? cardCenterX + 16 + Math.random() * Math.max(20, maxX - cardCenterX - 16)
+        : minX + Math.random() * Math.max(20, cardCenterX - minX - 16);
+
+      if (!Number.isFinite(spawnX)) spawnX = W / 2;
+
+      state.gutsSword = {
+        x: spawnX,
+        y: -110,
+        vx: 0,
+        vy: 14,
+        targetY: perchY,
+        angle: 0.06,
+        rested: false,
+        pickedUp: false
+      };
+
+      playClickTick(160);
+    }
+
+    function updateGutsSwordPhysics() {
+      if (!state.gutsSword) return;
+      const sw = state.gutsSword;
+      const perchY = getLedgeY();
+      sw.targetY = perchY;
+
+      if (state.dragItem && state.dragItem.type === 'sword' && state.dragItem.ref === sw) {
+        sw.x = state.mouseX;
+        sw.y = state.mouseY + 32;
+        sw.vx = 0;
+        sw.vy = 0;
+        sw.rested = false;
+        sw.pickedUp = false;
+        sw.angle = Math.max(-0.45, Math.min(0.45, (state.mouseX - state.prevMouseX) * 0.035));
+        return;
+      }
+
+      if (!sw.rested && !sw.pickedUp) {
+        sw.vy += 0.95;
+        sw.y += sw.vy;
+        if (sw.y >= perchY - 6) {
+          sw.y = perchY - 6;
+          sw.vy = 0;
+          sw.angle = 0.04;
+          sw.rested = true;
+          state.screenShake = 12;
+          playBerserkClang();
+          spawnSparks(sw.x, perchY, 18, 6.5);
+          spawnRipple(sw.x, perchY, 28);
+          spawnFloatingText(sw.x, perchY - 96, 'CLANG!! // dragon slayer');
+          setTimeout(() => {
+            if (state.gutsSword) {
+              spawnFloatingText(sw.x, perchY - 76, 'too big to be called a sword...');
+            }
+          }, 450);
+          cat.alertTimer = 50;
+        }
+      } else if (sw.rested && !sw.pickedUp) {
+        sw.y = perchY - 6;
+      }
+    }
+
+    function kickOrFlipNote(note) {
+      if (!note.written && !note.cancelled && (note.isOpen || cat.targetNote === note)) {
+        cancelCatWriting(note);
+        return;
+      }
+      note.vy = -6.5 - Math.random() * 2.5;
+      note.vx = (Math.random() - 0.5) * 7;
+      note.vAngle = (Math.random() - 0.5) * 0.22;
+      note.rested = false;
+      note.bounces = Math.max(0, note.bounces - 1);
+      playNotebookThud(0.8);
+      spawnFlutterPages(note.x, note.y, 2);
+      const quotes = [
+        '"the human whose name is written..."',
+        '...juicy (ryuk chuckles)',
+        '40 seconds...',
+        'shinigami eyes: active',
+        'L is watching...'
+      ];
+      const q = quotes[Math.floor(Math.random() * quotes.length)];
+      spawnFloatingText(note.x, note.y - 28, q);
+    }
+
+    function updateDeathNotesPhysics() {
+      const W = window.innerWidth || 360;
+      const cardRect = cardEl.getBoundingClientRect();
+      const perchY = getLedgeY();
+
+      for (let i = 0; i < state.deathNotes.length; i++) {
+        const n = state.deathNotes[i];
+        n.targetY = perchY - 12;
+
+        if (state.draggedNote === n) {
+          n.x = state.mouseX;
+          n.y = state.mouseY;
+          n.vx = (state.mouseX - state.prevMouseX) * 0.45;
+          n.vy = (state.mouseY - state.prevMouseY) * 0.45;
+          n.vAngle = n.vx * 0.015;
+          n.rested = false;
+          n.isOpen = false;
+          continue;
+        }
+
+        if (!n.rested) {
+          n.vy += 0.36;
+          n.x += n.vx;
+          n.y += n.vy;
+          n.angle += n.vAngle;
+
+          if (n.x < 34) {
+            n.x = 34;
+            n.vx *= -0.6;
+          } else if (n.x > W - 34) {
+            n.x = W - 34;
+            n.vx *= -0.6;
+          }
+
+          if (n.y >= n.targetY && n.vy > 0) {
+            n.y = n.targetY;
+            if (Math.abs(n.vy) > 2.1 && n.bounces < 3) {
+              n.vy = -n.vy * 0.42;
+              n.vx *= 0.72;
+              n.vAngle *= 0.6;
+              n.bounces++;
+              playNotebookThud(Math.min(1.2, Math.abs(n.vy) / 5));
+              spawnRipple(n.x, n.y + 10, 14);
+              if (n.bounces === 1) {
+                spawnFlutterPages(n.x, n.y, 3);
+              }
+            } else {
+              n.vy = 0;
+              n.vx = 0;
+              n.vAngle = 0;
+              n.rested = true;
+              n.angle = Math.max(-0.2, Math.min(0.2, n.angle));
+
+              const minLedgeX = Math.max(46, cardRect.left + 26);
+              const maxLedgeX = Math.min(W - 46, cardRect.right - 26);
+              n.x = Math.max(minLedgeX, Math.min(maxLedgeX, n.x));
+
+              if (!n.written && !n.cancelled && !state.unbreakableMode) {
+                cat.targetNote = n;
+                cat.alertTimer = 42;
+                playSoftChirp();
+                spawnFloatingText(cat.x, cat.y - 34, '!');
+              }
+            }
+          }
+        } else {
+          n.y = perchY - 12;
         }
       }
 
-      const radiusSq = state.gridRadius * state.gridRadius;
-
-      for (let i = 0; i < gridPoints.length; i++) {
-        const p = gridPoints[i];
-
-        // Cursor repulsion + subtle swirl
-        const dx = p.x - state.mouseX;
-        const dy = p.y - state.mouseY;
-        const distSq = dx * dx + dy * dy;
-
-        if (distSq < radiusSq && distSq > 0.01) {
-          const dist = Math.sqrt(distSq);
-          const force = (1 - dist / state.gridRadius) * 1.65;
-          const angle = Math.atan2(dy, dx);
-          p.vx += Math.cos(angle + 0.25) * force;
-          p.vy += Math.sin(angle + 0.25) * force;
-        }
-
-        // Cat paws disturbance when running
-        const cdx = p.x - cat.x;
-        const cdy = p.y - cat.y;
-        const cDistSq = cdx * cdx + cdy * cdy;
-        if (cDistSq < 3600 && (Math.abs(cat.vx) > 0.5 || Math.abs(cat.vy) > 0.5)) {
-          const cDist = Math.sqrt(cDistSq) || 1;
-          const cForce = (1 - cDist / 60) * 1.2;
-          p.vx += (cdx / cDist) * cForce;
-          p.vy += (cdy / cDist) * cForce;
-        }
-
-        // Click ripples
-        for (let r = 0; r < ripples.length; r++) {
-          const rip = ripples[r];
-          const rdx = p.ox - rip.x;
-          const rdy = p.oy - rip.y;
-          const rDist = Math.sqrt(rdx * rdx + rdy * rdy);
-          const band = Math.abs(rDist - rip.radius);
-          if (band < 28) {
-            const fade = 1 - rip.radius / rip.maxRadius;
-            const push = (1 - band / 28) * rip.strength * fade * 0.35;
-            const ang = Math.atan2(rdy, rdx);
-            p.vx += Math.cos(ang) * push;
-            p.vy += Math.sin(ang) * push;
-          }
-        }
-
-        // Spring back to origin
-        p.vx += (p.ox - p.x) * 0.085;
-        p.vy += (p.oy - p.y) * 0.085;
-
-        // Damping
-        p.vx *= 0.82;
-        p.vy *= 0.82;
-
-        p.x += p.vx;
+      for (let i = state.paperPages.length - 1; i >= 0; i--) {
+        const p = state.paperPages[i];
+        p.swaySeed += 0.07;
+        p.vy += 0.04;
+        p.x += p.vx + Math.sin(p.swaySeed) * 0.6;
         p.y += p.vy;
-
-        // Render dot or ASCII character depending on displacement energy
-        const disp = Math.abs(p.x - p.ox) + Math.abs(p.y - p.oy);
-        if (disp > 7) {
-          bgCtx.fillStyle = '#525252';
-          bgCtx.fillText('*', p.x, p.y);
-        } else if (disp > 2.2) {
-          bgCtx.fillStyle = '#363636';
-          bgCtx.fillText('+', p.x, p.y);
-        } else {
-          bgCtx.fillStyle = '#222222';
-          bgCtx.fillRect(p.x - 1, p.y - 1, 2, 2);
+        p.angle += p.vAngle;
+        p.alpha -= 0.012;
+        if (p.alpha <= 0) {
+          state.paperPages.splice(i, 1);
         }
       }
     }
 
     /* =========================================================================
-       2. PHYSICS-DRIVEN CAT COMPANION & LASER POINTER
+       CAT COMPANION STATE & GUARANTEED CROSS-DEVICE RENDERING
        ========================================================================= */
-    const catCanvas = document.getElementById('cat-canvas');
-    const catCtx = catCanvas.getContext('2d');
-    const cardEl = document.getElementById('card-container');
-
     const cat = {
-      x: 0,
-      y: 0,
+      x: 200,
+      y: 120,
       vx: 0,
       vy: 0,
       facing: -1,
-      mode: 'perched',
+      mode: 'perched', // 'perched' | 'chasing' | 'returning' | 'running_to_note' | 'writing_note' | 'running_to_sword' | 'guts_charging' | 'guts_slashing' | 'dragged'
       blinkTimer: 120,
       isBlinking: false,
       petSquintTimer: 0,
-      stretchFactor: 0,
+      purrWave: 0,
       walkCycle: 0,
+      stretchFactor: 0,
       pounceCooldown: 0,
-      tail: [],
+      hasNotifiedPet: false,
+      alertTimer: 0,
+      targetNote: null,
+      isGuts: false,
+      gutsTimer: 0,
+      swordAngle: -0.8,
+      inTrash: false,
+      trashTimer: null,
       initialized: false
     };
 
     function getPerchPosition() {
+      const W = document.documentElement.clientWidth || window.innerWidth || 360;
+      const cardRect = cardEl.getBoundingClientRect();
+      const perchX = Math.round(Math.max(48, Math.min(W - 48, cardRect.right - 68)));
+      const perchY = Math.round(cardRect.top);
+      return { x: perchX, y: perchY };
+    }
+
+    function sanitizeCat() {
+      const perch = getPerchPosition();
+      if (!Number.isFinite(cat.x) || !Number.isFinite(cat.y)) {
+        cat.x = perch.x;
+        cat.y = perch.y;
+        cat.vx = 0;
+        cat.vy = 0;
+      }
+      if (!Number.isFinite(cat.vx)) cat.vx = 0;
+      if (!Number.isFinite(cat.vy)) cat.vy = 0;
+    }
+
+    let lastTrackedCardRect = null;
+
+    function syncPositionsWithCardLedge() {
+      if (!cardEl || state.cardSliced) return;
       const rect = cardEl.getBoundingClientRect();
-      return {
-        x: rect.right - 68,
-        y: rect.top
-      };
+      if (lastTrackedCardRect) {
+        const dx = rect.left - lastTrackedCardRect.left;
+        const dy = rect.top - lastTrackedCardRect.top;
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          if (cat.mode === 'perched') {
+            const perch = getPerchPosition();
+            cat.x = perch.x;
+            cat.y = perch.y;
+          } else if (!cat.inTrash && !(state.dragItem && state.dragItem.type === 'cat')) {
+            cat.x += dx;
+            cat.y += dy;
+          }
+          state.deathNotes.forEach((n) => {
+            n.targetY = Math.round(rect.top) - 12;
+            if (n.rested) {
+              n.x += dx;
+              n.y = n.targetY;
+            }
+          });
+          if (state.gutsSword) {
+            state.gutsSword.targetY = Math.round(rect.top);
+            if (state.gutsSword.rested && !state.gutsSword.pickedUp) {
+              state.gutsSword.x += dx;
+              state.gutsSword.y = Math.round(rect.top) - 8;
+            }
+          }
+          state.snacks.forEach((s) => {
+            s.targetY = Math.round(rect.top) - 5;
+            s.x += dx;
+            s.y += dy;
+          });
+        }
+      }
+      lastTrackedCardRect = { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
     }
 
     function initCat() {
-      catCanvas.width = window.innerWidth;
-      catCanvas.height = window.innerHeight;
       const perch = getPerchPosition();
-      if (!cat.initialized) {
-        cat.x = perch.x;
-        cat.y = perch.y;
-        cat.tail = [];
-        for (let i = 0; i < 6; i++) {
-          cat.tail.push({ x: cat.x + i * 7, y: cat.y - 4 });
-        }
-        cat.initialized = true;
-      } else if (cat.mode === 'perched') {
-        cat.x = perch.x;
-        cat.y = perch.y;
-      }
+      cat.x = perch.x;
+      cat.y = perch.y;
+      cat.vx = 0;
+      cat.vy = 0;
+      cat.initialized = true;
+      const rect = cardEl.getBoundingClientRect();
+      lastTrackedCardRect = { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
     }
 
     function updateCatPhysics(time) {
+      sanitizeCat();
       const perch = getPerchPosition();
       const statusLabel = document.getElementById('cat-state-label');
 
-      // Blinking logic
+      if (cat.inTrash) {
+        statusLabel.textContent = '● cat: in trash bin 💀';
+        return;
+      }
+
       cat.blinkTimer--;
       if (cat.blinkTimer <= 0) {
         cat.isBlinking = true;
@@ -492,493 +1524,1734 @@
       if (cat.petSquintTimer > 0) cat.petSquintTimer--;
       if (cat.stretchFactor > 0) cat.stretchFactor *= 0.9;
       if (cat.pounceCooldown > 0) cat.pounceCooldown--;
+      if (cat.alertTimer > 0) cat.alertTimer--;
 
-      // Update falling snacks physics toward the top of the card
-      const cardRect = cardEl.getBoundingClientRect();
       for (let i = 0; i < state.snacks.length; i++) {
         const s = state.snacks[i];
+        if (state.dragItem && state.dragItem.type === 'snack' && state.dragItem.ref === s) {
+          s.x = state.mouseX;
+          s.y = state.mouseY;
+          s.vy = 0;
+          continue;
+        }
         if (s.y < s.targetY) {
           s.vy = (s.vy || 0) + 0.45;
           s.y = Math.min(s.targetY, s.y + s.vy);
         }
       }
 
-      // Priority 1: Chase snacks if any exist
-      if (state.snacks.length > 0) {
-        const targetSnack = state.snacks[0];
-        const dx = targetSnack.x - cat.x;
-        const dy = targetSnack.y - cat.y;
-        const dist = Math.hypot(dx, dy);
+      // If the user is actively dragging the cat by the scruff
+      if (state.dragItem && state.dragItem.type === 'cat' && state.dragItem.moved) {
+        cat.mode = 'dragged';
+        statusLabel.textContent = state.trashHover ? '● cat: NO NOT THE TRASH!!' : '● cat: dangling (dragged)';
+        const targetX = state.mouseX;
+        const targetY = state.mouseY + 18;
+        cat.vx = (targetX - cat.x) * 0.45;
+        cat.vy = (targetY - cat.y) * 0.45;
+        cat.x = targetX;
+        cat.y = targetY;
+        if (Math.abs(state.mouseX - state.prevMouseX) > 1.5) {
+          cat.facing = state.mouseX >= state.prevMouseX ? 1 : -1;
+        }
+        cat.walkCycle += 0.38;
+        sanitizeCat();
+        return;
+      }
 
-        statusLabel.textContent = 'cat: hunting snack';
-        if (Math.abs(dx) > 3) cat.facing = dx > 0 ? 1 : -1;
+      const activeNote = !state.unbreakableMode
+        ? state.deathNotes.find((n) => n.rested && !n.written && !n.cancelled && state.draggedNote !== n)
+        : null;
+      if (activeNote) {
+        cat.targetNote = activeNote;
+      } else if (state.unbreakableMode) {
+        cat.targetNote = null;
+      }
 
-        if (dist > 14) {
-          const accel = 0.68 * state.catSpeedMultiplier;
-          cat.vx += (dx / dist) * accel;
-          cat.vy += (dy / dist) * accel;
-        } else {
-          state.snacks.shift();
-          cat.petSquintTimer = 45;
-          cat.stretchFactor = 0.7;
-          playPurrSynth();
-          spawnRipple(cat.x, cat.y, 10);
+      // Priority 0: Berserk Guts Dragon Slayer Sequence (Ignored if unbreakableMode is active)
+      if (!state.unbreakableMode && state.gutsSword && !(state.dragItem && state.dragItem.type === 'sword')) {
+        const sw = state.gutsSword;
+        const cardRect = cardEl.getBoundingClientRect();
+
+        if (sw.rested && !sw.pickedUp && cat.mode !== 'writing_note') {
+          cat.mode = 'running_to_sword';
+          statusLabel.textContent = '● cat: claiming dragon slayer...';
+
+          const dx = sw.x - cat.x;
+          const dy = sw.targetY - cat.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (Math.abs(dx) > 2) {
+            cat.facing = dx > 0 ? 1 : -1;
+          }
+
+          if (dist > 14) {
+            const runSpeed = 8.2;
+            cat.vx = cat.vx * 0.72 + (dx / dist) * runSpeed * 0.34;
+            cat.vy = cat.vy * 0.72 + (dy / dist) * runSpeed * 0.34;
+            cat.x += cat.vx;
+            cat.y += cat.vy;
+            cat.walkCycle += Math.hypot(cat.vx, cat.vy) * 0.16;
+          } else {
+            sw.pickedUp = true;
+            cat.isGuts = true;
+            cat.mode = 'guts_charging';
+            cat.gutsTimer = 46;
+            cat.swordAngle = 2.15;
+            cat.stretchFactor = 1.25;
+            playBerserkClang();
+            spawnSparks(cat.x, cat.y - 18, 22, 6);
+            spawnFloatingText(cat.x, cat.y - 52, 'GUTS MODE // BLACK SWORDSMAN');
+          }
+        } else if (cat.mode === 'guts_charging') {
+          statusLabel.textContent = '● cat: GUTS [CHARGING SLASH]';
+          const targetX = cardRect.left + cardRect.width * 0.52;
+          const targetY = cardRect.top + cardRect.height * 0.46;
+          const dx = targetX - cat.x;
+          const dy = targetY - cat.y;
+          cat.vx = dx * 0.16;
+          cat.vy = dy * 0.16;
+          cat.x += cat.vx;
+          cat.y += cat.vy;
+          cat.facing = -1;
+          cat.swordAngle = 2.25 + Math.sin(time * 0.04) * 0.12;
+          cat.gutsTimer--;
+
+          if (cat.gutsTimer % 5 === 0) {
+            spawnSparks(cat.x, cat.y - 15, 2, 3.5);
+          }
+
+          if (cat.gutsTimer <= 0) {
+            cat.mode = 'guts_slashing';
+            cat.gutsTimer = 38;
+            cat.swordAngle = -1.35;
+            sliceCardInHalf();
+          }
+        } else if (cat.mode === 'guts_slashing') {
+          statusLabel.textContent = '● cat: GUTS [CARD SLICED]';
+          cat.vx *= 0.8;
+          cat.vy *= 0.8;
+          cat.gutsTimer--;
+          if (cat.gutsTimer <= 0) {
+            state.gutsSword = null;
+            cat.isGuts = false;
+            cat.mode = 'returning';
+          }
         }
 
-        cat.vx *= 0.84;
-        cat.vy *= 0.84;
-        cat.x += cat.vx;
-        cat.y += cat.vy;
+        sanitizeCat();
+        return;
+      }
 
-      } else if (state.laserActive) {
-        // Priority 2: Chase laser pointer across the screen
-        cat.mode = 'chasing';
-        const dx = state.mouseX - cat.x;
-        const dy = state.mouseY - cat.y;
+      // Priority 1: Death Note Sequence (Ignored if unbreakableMode is active)
+      if (!state.unbreakableMode && cat.targetNote && !cat.targetNote.written && !cat.targetNote.cancelled && state.draggedNote !== cat.targetNote) {
+        const note = cat.targetNote;
+        const standX = note.x + (cat.x < note.x ? -24 : 24);
+        const standY = note.y + 10;
+        const dx = standX - cat.x;
+        const dy = standY - cat.y;
         const dist = Math.hypot(dx, dy);
 
-        if (Math.abs(dx) > 4) {
+        if (dist > 14 && cat.mode !== 'writing_note') {
+          cat.mode = 'running_to_note';
+          statusLabel.textContent = '● cat: sprinting to death note!';
+          if (Math.abs(dx) > 2) {
+            cat.facing = dx > 0 ? 1 : -1;
+          }
+          const runSpeed = 7.6;
+          cat.vx = cat.vx * 0.72 + (dx / dist) * runSpeed * 0.34;
+          cat.vy = cat.vy * 0.72 + (dy / dist) * runSpeed * 0.34;
+          cat.x += cat.vx;
+          cat.y += cat.vy;
+          cat.walkCycle += Math.hypot(cat.vx, cat.vy) * 0.16;
+        } else {
+          cat.mode = 'writing_note';
+          cat.x += (standX - cat.x) * 0.25;
+          cat.y += (standY - cat.y) * 0.25;
+          cat.vx = 0;
+          cat.vy = 0;
+          cat.facing = note.x >= cat.x ? 1 : -1;
+
+          if (!note.isOpen) {
+            note.isOpen = true;
+            note.angle = 0;
+            spawnFlutterPages(note.x, note.y, 3);
+            playNotebookThud(0.95);
+            spawnFloatingText(note.x, note.y - 38, 'cat opened the death note...');
+          }
+
+          note.writingProgress += 0.0058;
+          statusLabel.textContent = `● cat: writing your name (${Math.min(100, Math.floor(note.writingProgress * 100))}%)`;
+
+          if (Math.random() < 0.28) {
+            playPenScratch();
+          }
+
+          if (note.writingProgress >= 1) {
+            note.writingProgress = 1;
+            note.written = true;
+            cat.targetNote = null;
+            executeDeathNoteRedirect(note.targetName);
+          }
+        }
+      } else if (state.laserMode || (!state.unbreakableMode && state.snacks.length > 0)) {
+        cat.mode = 'chasing';
+        let targetX = state.mouseX;
+        let targetY = state.mouseY;
+        let chasingSnack = false;
+
+        if (!state.unbreakableMode && state.snacks.length > 0) {
+          targetX = state.snacks[0].x;
+          targetY = state.snacks[0].y;
+          chasingSnack = true;
+        }
+
+        const dx = targetX - cat.x;
+        const dy = targetY - cat.y;
+        const dist = Math.hypot(dx, dy);
+
+        statusLabel.textContent = chasingSnack ? '● cat: hunting snack' : '● cat: chasing laser';
+
+        if (Math.abs(dx) > 3) {
           cat.facing = dx > 0 ? 1 : -1;
         }
 
-        if (dist > 18) {
-          let boost = 1;
-          if (dist < 140 && dist > 45 && cat.pounceCooldown === 0 && Math.random() < 0.035) {
-            boost = 3.8;
-            cat.pounceCooldown = 65;
-          }
+        const maxSpeed = 3.2 + state.catAgility * 0.85;
+        const accel = 0.12 + state.catAgility * 0.025;
 
-          const accel = 0.72 * state.catSpeedMultiplier * boost;
-          cat.vx += (dx / dist) * accel;
-          cat.vy += (dy / dist) * accel;
-          statusLabel.textContent = boost > 1 ? 'cat: pouncing!' : 'cat: chasing laser';
+        if (dist > 14) {
+          if (dist < 130 && dist > 55 && cat.pounceCooldown <= 0) {
+            cat.vx = (dx / dist) * (maxSpeed * 1.65);
+            cat.vy = (dy / dist) * (maxSpeed * 1.65);
+            cat.stretchFactor = 1.2;
+            cat.pounceCooldown = 55;
+            playClickTick(240);
+          } else {
+            cat.vx = cat.vx * 0.82 + (dx / dist) * maxSpeed * accel;
+            cat.vy = cat.vy * 0.82 + (dy / dist) * maxSpeed * accel;
+          }
+          cat.walkCycle += Math.hypot(cat.vx, cat.vy) * 0.12;
         } else {
-          statusLabel.textContent = 'cat: caught dot';
-          if (Math.random() < 0.08) {
-            cat.vx += (Math.random() - 0.5) * 4;
-            cat.vy += (Math.random() - 0.5) * 4;
+          cat.vx *= 0.65;
+          cat.vy *= 0.65;
+
+          if (chasingSnack) {
+            const eaten = state.snacks.shift();
+            cat.petSquintTimer = 45;
+            cat.stretchFactor = 0.8;
+            playSoftChirp();
+            spawnRipple(cat.x, cat.y, 12);
+            if (eaten && eaten.isApple) {
+              spawnFloatingText(cat.x, cat.y - 28, '...juicy (ryuk approves)');
+            } else {
+              spawnFloatingText(cat.x, cat.y - 28, '*cronch*');
+            }
           }
         }
 
-        cat.vx *= 0.87;
-        cat.vy *= 0.87;
         cat.x += cat.vx;
         cat.y += cat.vy;
-
-        cat.x = Math.max(24, Math.min(window.innerWidth - 24, cat.x));
-        cat.y = Math.max(30, Math.min(window.innerHeight - 16, cat.y));
-
       } else {
-        // Priority 3: Return to perch on top edge of the card
         const dx = perch.x - cat.x;
         const dy = perch.y - cat.y;
         const dist = Math.hypot(dx, dy);
 
-        if (dist > 4) {
+        if (dist > 3.5) {
           cat.mode = 'returning';
-          statusLabel.textContent = 'cat: returning to perch';
-          cat.facing = dx > 0 ? 1 : -1;
-          const speed = Math.min(dist * 0.12, 6.5 * state.catSpeedMultiplier);
-          cat.vx = (dx / dist) * speed;
-          cat.vy = (dy / dist) * speed;
+          statusLabel.textContent = '● cat: returning';
+          if (Math.abs(dx) > 2) cat.facing = dx > 0 ? 1 : -1;
+          cat.vx = dx * 0.11;
+          cat.vy = dy * 0.11;
           cat.x += cat.vx;
           cat.y += cat.vy;
+          cat.walkCycle += Math.hypot(cat.vx, cat.vy) * 0.1;
         } else {
           cat.mode = 'perched';
           cat.x = perch.x;
           cat.y = perch.y;
           cat.vx = 0;
           cat.vy = 0;
-          if (Math.abs(state.mouseX - cat.x) > 20) {
-            cat.facing = state.mouseX > cat.x ? 1 : -1;
-          }
-          statusLabel.textContent = cat.petSquintTimer > 0 ? 'cat: purring' : 'cat: watching cursor';
+          cat.facing = state.mouseX >= cat.x ? 1 : -1;
+          statusLabel.textContent = cat.petSquintTimer > 0 ? '● cat: purring' : '● cat: perched';
         }
       }
 
-      // Walk cycle animation
-      const speedMag = Math.hypot(cat.vx, cat.vy);
-      if (speedMag > 0.4) {
-        cat.walkCycle += speedMag * 0.16;
-      } else {
-        cat.walkCycle = 0;
-      }
-
-      // Multi-segment tail physics
-      const tailBaseX = cat.x - cat.facing * 14;
-      const tailBaseY = cat.y - 6;
-      cat.tail[0].x = tailBaseX;
-      cat.tail[0].y = tailBaseY;
-
-      const sway = Math.sin(time * 0.004) * (cat.mode === 'chasing' ? 2.5 : 1.2);
-
-      for (let i = 1; i < cat.tail.length; i++) {
-        const prev = cat.tail[i - 1];
-        const cur = cat.tail[i];
-
-        if (speedMag < 0.6) {
-          cur.x += (-cat.facing * 2.2 + sway * 0.4 - (cur.x - prev.x)) * 0.25;
-          cur.y += (-3.8 + Math.cos(time * 0.003 + i) * 0.5 - (cur.y - prev.y)) * 0.25;
-        }
-
-        const tdx = cur.x - prev.x;
-        const tdy = cur.y - prev.y;
-        const tDist = Math.hypot(tdx, tdy) || 1;
-        const segLen = 5.5;
-
-        cur.x = prev.x + (tdx / tDist) * segLen;
-        cur.y = prev.y + (tdy / tDist) * segLen;
-      }
-    }
-
-    function drawCatAndOverlay(time) {
-      catCtx.clearRect(0, 0, catCanvas.width, catCanvas.height);
-
-      // 1. Draw dropped snacks
-      for (let i = 0; i < state.snacks.length; i++) {
-        const s = state.snacks[i];
-        catCtx.save();
-        catCtx.translate(s.x, s.y);
-        catCtx.fillStyle = '#e5e5e5';
-        catCtx.strokeStyle = '#0a0a0a';
-        catCtx.lineWidth = 1;
-        catCtx.beginPath();
-        catCtx.ellipse(0, -3, 6, 3.2, 0, 0, Math.PI * 2);
-        catCtx.moveTo(-5, -3);
-        catCtx.lineTo(-9, -6.5);
-        catCtx.lineTo(-9, 0.5);
-        catCtx.closePath();
-        catCtx.fill();
-        catCtx.stroke();
-        catCtx.restore();
-      }
-
-      // 2. Draw Laser Dot if active
-      if (state.laserActive) {
-        catCtx.save();
-        catCtx.fillStyle = '#ffffff';
-        catCtx.beginPath();
-        catCtx.arc(state.mouseX, state.mouseY, 3.5, 0, Math.PI * 2);
-        catCtx.fill();
-
-        catCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-        catCtx.lineWidth = 1;
-        catCtx.beginPath();
-        catCtx.arc(state.mouseX, state.mouseY, 7 + Math.sin(time * 0.02) * 1.5, 0, Math.PI * 2);
-        catCtx.stroke();
-        catCtx.restore();
-      }
-
-      // 3. Draw the Cat
-      catCtx.save();
-
-      // Draw Tail behind body
-      catCtx.beginPath();
-      catCtx.moveTo(cat.tail[0].x, cat.tail[0].y);
-      for (let i = 1; i < cat.tail.length; i++) {
-        catCtx.lineTo(cat.tail[i].x, cat.tail[i].y);
-      }
-      catCtx.strokeStyle = '#525252';
-      catCtx.lineWidth = 5;
-      catCtx.lineCap = 'round';
-      catCtx.lineJoin = 'round';
-      catCtx.stroke();
-
-      catCtx.strokeStyle = '#141414';
-      catCtx.lineWidth = 3;
-      catCtx.stroke();
-
-      // Body transform (squish/stretch)
-      const speedMag = Math.hypot(cat.vx, cat.vy);
-      const stretchY = 1 + cat.stretchFactor * 0.28;
-      const stretchX = 1 - cat.stretchFactor * 0.12 + Math.min(speedMag * 0.025, 0.22);
-
-      catCtx.translate(cat.x, cat.y);
-      catCtx.scale(stretchX, stretchY);
-
-      // Legs
-      catCtx.strokeStyle = '#525252';
-      catCtx.fillStyle = '#141414';
-      catCtx.lineWidth = 3;
-      catCtx.lineCap = 'round';
-
-      if (speedMag > 0.5) {
-        const legSwing1 = Math.sin(cat.walkCycle) * 5;
-        const legSwing2 = Math.cos(cat.walkCycle) * 5;
-        catCtx.beginPath();
-        catCtx.moveTo(-cat.facing * 9, -4);
-        catCtx.lineTo(-cat.facing * 9 + legSwing1, 2);
-        catCtx.moveTo(-cat.facing * 5, -4);
-        catCtx.lineTo(-cat.facing * 5 - legSwing1, 2);
-        catCtx.moveTo(cat.facing * 7, -4);
-        catCtx.lineTo(cat.facing * 7 + legSwing2, 2);
-        catCtx.moveTo(cat.facing * 10, -4);
-        catCtx.lineTo(cat.facing * 10 - legSwing2, 2);
-        catCtx.stroke();
-      } else {
-        // Neat sitting paws on the card top border
-        catCtx.fillStyle = '#e5e5e5';
-        catCtx.beginPath();
-        catCtx.arc(cat.facing * 6, -1, 2.2, 0, Math.PI * 2);
-        catCtx.arc(cat.facing * 10, -1, 2.2, 0, Math.PI * 2);
-        catCtx.fill();
-      }
-
-      // Main Body Silhouette
-      catCtx.fillStyle = '#141414';
-      catCtx.strokeStyle = '#525252';
-      catCtx.lineWidth = 1.25;
-
-      catCtx.beginPath();
-      catCtx.ellipse(0, -9, 14, 8.5, 0, 0, Math.PI * 2);
-      catCtx.fill();
-      catCtx.stroke();
-
-      // Head position
-      const headBob = speedMag > 0.5 ? Math.abs(Math.sin(cat.walkCycle)) * 1.5 : 0;
-      const hx = cat.facing * 10;
-      const hy = -16 - headBob;
-
-      // Pointy Ears
-      catCtx.beginPath();
-      catCtx.moveTo(hx - 7, hy - 5);
-      catCtx.lineTo(hx - 9, hy - 14);
-      catCtx.lineTo(hx - 2, hy - 8);
-      catCtx.moveTo(hx + 2, hy - 8);
-      catCtx.lineTo(hx + 9, hy - 14);
-      catCtx.lineTo(hx + 7, hy - 5);
-      catCtx.fill();
-      catCtx.stroke();
-
-      // Head Circle
-      catCtx.beginPath();
-      catCtx.arc(hx, hy, 9, 0, Math.PI * 2);
-      catCtx.fill();
-      catCtx.stroke();
-
-      // Eyes Tracking Cursor
-      const eyeCenterX = hx + cat.facing * 2;
-      const eyeY = hy - 1;
-      const leftEyeX = eyeCenterX - 3.3;
-      const rightEyeX = eyeCenterX + 3.3;
-
-      if (cat.petSquintTimer > 0) {
-        // Happy squinting ^ ^ eyes when petted
-        catCtx.strokeStyle = '#e5e5e5';
-        catCtx.lineWidth = 1.3;
-        catCtx.beginPath();
-        catCtx.moveTo(leftEyeX - 2, eyeY + 1);
-        catCtx.lineTo(leftEyeX, eyeY - 1.5);
-        catCtx.lineTo(leftEyeX + 2, eyeY + 1);
-        catCtx.moveTo(rightEyeX - 2, eyeY + 1);
-        catCtx.lineTo(rightEyeX, eyeY - 1.5);
-        catCtx.lineTo(rightEyeX + 2, eyeY + 1);
-        catCtx.stroke();
-      } else if (cat.isBlinking) {
-        catCtx.strokeStyle = '#e5e5e5';
-        catCtx.lineWidth = 1.2;
-        catCtx.beginPath();
-        catCtx.moveTo(leftEyeX - 2, eyeY);
-        catCtx.lineTo(leftEyeX + 2, eyeY);
-        catCtx.moveTo(rightEyeX - 2, eyeY);
-        catCtx.lineTo(rightEyeX + 2, eyeY);
-        catCtx.stroke();
-      } else {
-        catCtx.fillStyle = '#e5e5e5';
-        catCtx.beginPath();
-        catCtx.arc(leftEyeX, eyeY, 2.3, 0, Math.PI * 2);
-        catCtx.arc(rightEyeX, eyeY, 2.3, 0, Math.PI * 2);
-        catCtx.fill();
-
-        // Pupils looking toward cursor
-        const angleToMouse = Math.atan2(state.mouseY - (cat.y + hy), state.mouseX - (cat.x + hx));
-        const px = Math.cos(angleToMouse) * 0.9;
-        const py = Math.sin(angleToMouse) * 0.9;
-
-        catCtx.fillStyle = '#0a0a0a';
-        catCtx.beginPath();
-        catCtx.arc(leftEyeX + px, eyeY + py, 1.1, 0, Math.PI * 2);
-        catCtx.arc(rightEyeX + px, eyeY + py, 1.1, 0, Math.PI * 2);
-        catCtx.fill();
-      }
-
-      // Whiskers
-      catCtx.strokeStyle = '#525252';
-      catCtx.lineWidth = 0.8;
-      catCtx.beginPath();
-      catCtx.moveTo(hx - 7, hy + 1);
-      catCtx.lineTo(hx - 12, hy);
-      catCtx.moveTo(hx - 7, hy + 3);
-      catCtx.lineTo(hx - 12, hy + 4);
-      catCtx.moveTo(hx + 7, hy + 1);
-      catCtx.lineTo(hx + 12, hy);
-      catCtx.moveTo(hx + 7, hy + 3);
-      catCtx.lineTo(hx + 12, hy + 4);
-      catCtx.stroke();
-
-      catCtx.restore();
+      sanitizeCat();
     }
 
     /* =========================================================================
-       3. INTERACTION & UI HANDLERS
+       DRAWING: BACKGROUND GRID & FOREGROUND CAT + ANIME PROPS
        ========================================================================= */
-    window.addEventListener('mousemove', (e) => {
-      state.mouseX = e.clientX;
-      state.mouseY = e.clientY;
+    function drawBackgroundGrid() {
+      const W = window.innerWidth || 360;
+      const H = window.innerHeight || 640;
+      bgCtx.clearRect(0, 0, W, H);
+
+      const forceRadius = state.gridForce;
+      bgCtx.font = '10px "JetBrains Mono", monospace';
+      bgCtx.textAlign = 'center';
+      bgCtx.textBaseline = 'middle';
+
+      for (let i = state.ripples.length - 1; i >= 0; i--) {
+        const rp = state.ripples[i];
+        rp.radius += 6;
+        rp.strength *= 0.94;
+        if (rp.radius > rp.maxRadius || rp.strength < 0.25) {
+          state.ripples.splice(i, 1);
+        }
+      }
+
+      for (let i = 0; i < gridPoints.length; i++) {
+        const p = gridPoints[i];
+
+        if (state.mouseActive && forceRadius > 0) {
+          const dx = p.x - state.mouseX;
+          const dy = p.y - state.mouseY;
+          const distSq = dx * dx + dy * dy;
+          const maxDistSq = forceRadius * forceRadius;
+
+          if (distSq < maxDistSq && distSq > 0.01) {
+            const dist = Math.sqrt(distSq);
+            const factor = (1 - dist / forceRadius) * 1.8;
+            p.vx += (dx / dist) * factor;
+            p.vy += (dy / dist) * factor;
+          }
+        }
+
+        for (let r = 0; r < state.ripples.length; r++) {
+          const rp = state.ripples[r];
+          const dx = p.x - rp.x;
+          const dy = p.y - rp.y;
+          const dist = Math.hypot(dx, dy);
+          const band = Math.abs(dist - rp.radius);
+          if (band < 24 && dist > 0.1) {
+            const push = (1 - band / 24) * (rp.strength * 0.18);
+            p.vx += (dx / dist) * push;
+            p.vy += (dy / dist) * push;
+          }
+        }
+
+        p.vx += (p.ox - p.x) * 0.1;
+        p.vy += (p.oy - p.y) * 0.1;
+        p.vx *= 0.82;
+        p.vy *= 0.82;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        const disp = Math.hypot(p.x - p.ox, p.y - p.oy);
+
+        if (disp > 6.5) {
+          bgCtx.fillStyle = disp > 14 ? '#6e6e6e' : '#3d3d3d';
+          bgCtx.fillText(disp > 15 ? '*' : '+', p.x, p.y);
+        } else {
+          bgCtx.fillStyle = '#1e1e1e';
+          bgCtx.fillRect(p.x - 1, p.y - 1, 2, 2);
+        }
+      }
+    }
+
+    function drawSingleDeathNote(n) {
+      fgCtx.save();
+      fgCtx.translate(n.x, n.y);
+      fgCtx.rotate(n.angle);
+
+      fgCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      if (n.isOpen) {
+        fgCtx.fillRect(-n.w - 2, -n.h / 2 + 4, n.w * 2 + 4, n.h);
+      } else {
+        fgCtx.fillRect(-n.w / 2 + 3, -n.h / 2 + 4, n.w, n.h);
+      }
+
+      if (n.isOpen) {
+        fgCtx.fillStyle = '#0a0a0a';
+        fgCtx.strokeStyle = '#686868';
+        fgCtx.lineWidth = 1.5;
+        fgCtx.beginPath();
+        fgCtx.roundRect(-n.w, -n.h / 2, n.w * 2, n.h, 3);
+        fgCtx.fill();
+        fgCtx.stroke();
+
+        fgCtx.fillStyle = '#d4d4d4';
+        fgCtx.fillRect(-n.w + 3, -n.h / 2 + 3, n.w - 4, n.h - 6);
+        fgCtx.fillStyle = '#e8e8e8';
+        fgCtx.fillRect(1, -n.h / 2 + 3, n.w - 4, n.h - 6);
+
+        fgCtx.strokeStyle = '#333333';
+        fgCtx.lineWidth = 1.2;
+        fgCtx.beginPath();
+        fgCtx.moveTo(0, -n.h / 2 + 2);
+        fgCtx.lineTo(0, n.h / 2 - 2);
+        fgCtx.stroke();
+
+        fgCtx.strokeStyle = '#999999';
+        fgCtx.lineWidth = 0.8;
+        for (let row = -18; row <= 18; row += 7) {
+          fgCtx.beginPath();
+          fgCtx.moveTo(-n.w + 7, row);
+          fgCtx.lineTo(-5, row);
+          fgCtx.stroke();
+        }
+
+        const totalLines = 6;
+        const activeLines = Math.ceil(n.writingProgress * totalLines);
+        fgCtx.strokeStyle = '#111111';
+        fgCtx.lineWidth = 1.3;
+        for (let l = 0; l < activeLines; l++) {
+          const ly = -18 + l * 6.5;
+          const lineFrac = Math.min(1, Math.max(0.15, n.writingProgress * totalLines - l));
+          fgCtx.beginPath();
+          fgCtx.moveTo(5, ly);
+          fgCtx.lineTo(5 + (n.w - 12) * lineFrac, ly);
+          fgCtx.stroke();
+        }
+      } else {
+        fgCtx.fillStyle = '#e0e0e0';
+        fgCtx.fillRect(-n.w / 2 + 2, -n.h / 2 + 2, n.w - 2, n.h - 3);
+
+        fgCtx.fillStyle = '#090909';
+        fgCtx.strokeStyle = '#757575';
+        fgCtx.lineWidth = 1.5;
+        fgCtx.beginPath();
+        fgCtx.roundRect(-n.w / 2, -n.h / 2, n.w - 2, n.h, 2.5);
+        fgCtx.fill();
+        fgCtx.stroke();
+
+        fgCtx.strokeStyle = '#3a3a3a';
+        fgCtx.lineWidth = 1.5;
+        fgCtx.beginPath();
+        fgCtx.moveTo(-n.w / 2 + 4.5, -n.h / 2 + 1);
+        fgCtx.lineTo(-n.w / 2 + 4.5, n.h / 2 - 1);
+        fgCtx.stroke();
+
+        fgCtx.fillStyle = '#f2f2f2';
+        fgCtx.font = 'bold 6.5px "JetBrains Mono", monospace';
+        fgCtx.textAlign = 'center';
+        fgCtx.fillText('DEATH', 1.5, -9);
+        fgCtx.fillText('NOTE', 1.5, -1);
+
+        fgCtx.strokeStyle = '#8a8a8a';
+        fgCtx.lineWidth = 0.9;
+        fgCtx.beginPath();
+        fgCtx.moveTo(1.5, 6);
+        fgCtx.lineTo(1.5, 19);
+        fgCtx.moveTo(-3.5, 11);
+        fgCtx.lineTo(6.5, 11);
+        fgCtx.stroke();
+      }
+
+      fgCtx.restore();
+    }
+
+    function drawDragonSlayerBlade(x, y, angle, scale = 1) {
+      const now = performance.now();
+      const breeze = Math.sin(now * 0.005) * 2.2;
+      const breeze2 = Math.cos(now * 0.0065) * 2.6;
+
+      fgCtx.save();
+      fgCtx.translate(x, y);
+      fgCtx.rotate(angle);
+      fgCtx.scale(scale, scale);
+
+      // =====================================================================
+      // 1. MASSIVE SLAB BLADE (Flat squared shoulders at y=0, tip at y=88)
+      // =====================================================================
+      // Outer Beveled Steel Silhouette (No protruding crossguard, wide flat top)
+      fgCtx.fillStyle = '#e4e4e7';
+      fgCtx.strokeStyle = '#18181b';
+      fgCtx.lineWidth = 1.6;
+      fgCtx.lineJoin = 'miter';
+      fgCtx.beginPath();
+      fgCtx.moveTo(-14.5, 0);
+      fgCtx.lineTo(14.5, 0);
+      fgCtx.lineTo(10.8, 69);
+      fgCtx.lineTo(0, 88);
+      fgCtx.lineTo(-10.8, 69);
+      fgCtx.closePath();
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      // Crisp bright outer metallic rim highlight so it pops against dark backgrounds
+      fgCtx.strokeStyle = '#f4f4f5';
+      fgCtx.lineWidth = 1.1;
+      fgCtx.beginPath();
+      fgCtx.moveTo(-14.5, 0);
+      fgCtx.lineTo(14.5, 0);
+      fgCtx.lineTo(10.8, 69);
+      fgCtx.lineTo(0, 88);
+      fgCtx.lineTo(-10.8, 69);
+      fgCtx.closePath();
+      fgCtx.stroke();
+
+      // Subtle shaded inner bevel gradient/stipple tone along blade edges
+      fgCtx.fillStyle = '#d4d4d8';
+      fgCtx.beginPath();
+      fgCtx.moveTo(-13.8, 1);
+      fgCtx.lineTo(-9, 1);
+      fgCtx.lineTo(-6.2, 66);
+      fgCtx.lineTo(0, 77);
+      fgCtx.lineTo(0, 86.5);
+      fgCtx.lineTo(-10.2, 68.5);
+      fgCtx.closePath();
+      fgCtx.fill();
+
+      // Center bevel ridge line at the V-point tip
+      fgCtx.strokeStyle = '#3f3f46';
+      fgCtx.lineWidth = 1.1;
+      fgCtx.beginPath();
+      fgCtx.moveTo(0, 76);
+      fgCtx.lineTo(0, 87.5);
+      fgCtx.stroke();
+
+      // Diagonal manga metallic sheen slashes across the silver bevels
+      fgCtx.strokeStyle = '#ffffff';
+      fgCtx.lineWidth = 1.3;
+      fgCtx.beginPath();
+      // Left bevel upper sheen
+      fgCtx.moveTo(-13.2, 14);
+      fgCtx.lineTo(-9.2, 18);
+      fgCtx.moveTo(-13.0, 17.5);
+      fgCtx.lineTo(-9.1, 21.5);
+      // Right bevel upper-mid sheen
+      fgCtx.moveTo(12.6, 22);
+      fgCtx.lineTo(8.5, 27);
+      fgCtx.moveTo(12.4, 25.5);
+      fgCtx.lineTo(8.3, 30.5);
+      // Left & right lower bevel ticks
+      fgCtx.moveTo(-11.2, 54);
+      fgCtx.lineTo(-7.2, 58);
+      fgCtx.moveTo(11.0, 58);
+      fgCtx.lineTo(7.0, 62);
+      fgCtx.stroke();
+
+      // =====================================================================
+      // 2. PITCH-BLACK ROUGH IRON CENTRAL CORE
+      // =====================================================================
+      fgCtx.fillStyle = '#09090b';
+      fgCtx.strokeStyle = '#3f3f46';
+      fgCtx.lineWidth = 1.1;
+      fgCtx.beginPath();
+      fgCtx.moveTo(-9.2, 0.8);
+      fgCtx.lineTo(9.2, 0.8);
+      fgCtx.lineTo(6.2, 66.5);
+      fgCtx.lineTo(0, 77);
+      fgCtx.lineTo(-6.2, 66.5);
+      fgCtx.closePath();
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      // Subtle diagonal dark-iron sheen streaks inside the lower black core
+      fgCtx.strokeStyle = '#27272a';
+      fgCtx.lineWidth = 1.6;
+      fgCtx.beginPath();
+      fgCtx.moveTo(-5.2, 54);
+      fgCtx.lineTo(4.2, 46);
+      fgCtx.moveTo(-4.8, 59);
+      fgCtx.lineTo(4.5, 51);
+      fgCtx.stroke();
+
+      // =====================================================================
+      // 3. BASE COLLAR & CHAIN-LINK LOOP AT TOP OF BLADE
+      // =====================================================================
+      // Semi-circular iron collar plate at blade shoulder
+      fgCtx.fillStyle = '#18181b';
+      fgCtx.strokeStyle = '#71717a';
+      fgCtx.lineWidth = 1.2;
+      fgCtx.beginPath();
+      fgCtx.arc(0, 0.8, 7.6, 0, Math.PI);
+      fgCtx.closePath();
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      fgCtx.strokeStyle = '#52525b';
+      fgCtx.lineWidth = 0.9;
+      fgCtx.beginPath();
+      fgCtx.arc(0, 0.8, 5.4, 0.15, Math.PI - 0.15);
+      fgCtx.stroke();
+
+      // Central vertical chain-link loop embossed into the collar
+      fgCtx.fillStyle = '#09090b';
+      fgCtx.strokeStyle = '#a1a1aa';
+      fgCtx.lineWidth = 1.15;
+      fgCtx.beginPath();
+      fgCtx.roundRect(-1.8, 1.5, 3.6, 6.2, 1.6);
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      // Small collar mount ring right where the handle meets the blade
+      fgCtx.fillStyle = '#71717a';
+      fgCtx.strokeStyle = '#e4e4e7';
+      fgCtx.lineWidth = 1;
+      fgCtx.fillRect(-4.2, -2.2, 8.4, 2.2);
+      fgCtx.strokeRect(-4.2, -2.2, 8.4, 2.2);
+
+      // =====================================================================
+      // 4. FLOWING TATTERED CLOTH BANDAGE RIBBONS (TIED BELOW POMMEL)
+      // =====================================================================
+      // Lower ribbon tail
+      fgCtx.fillStyle = '#e4e4e7';
+      fgCtx.strokeStyle = '#18181b';
+      fgCtx.lineWidth = 1.25;
+      fgCtx.beginPath();
+      fgCtx.moveTo(2.8, -32);
+      fgCtx.quadraticCurveTo(10, -29 + breeze * 0.4, 10.5 + breeze * 0.7, -19);
+      fgCtx.lineTo(7.5 + breeze * 0.6, -15.5);
+      fgCtx.lineTo(6.2 + breeze * 0.5, -19.5);
+      fgCtx.lineTo(4.0 + breeze * 0.5, -16.5);
+      fgCtx.quadraticCurveTo(6.8, -25, 2.4, -30);
+      fgCtx.closePath();
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      // Upper wide tattered cloth ribbon
+      fgCtx.fillStyle = '#f4f4f5';
+      fgCtx.strokeStyle = '#18181b';
+      fgCtx.lineWidth = 1.25;
+      fgCtx.beginPath();
+      fgCtx.moveTo(3.0, -33.5);
+      fgCtx.quadraticCurveTo(13, -37 + breeze2 * 0.5, 21 + breeze, -28 + breeze2 * 0.6);
+      // Jagged tattered cloth notches matching reference drawing
+      fgCtx.lineTo(18.5 + breeze, -26.5 + breeze2 * 0.5);
+      fgCtx.lineTo(17.5 + breeze, -23.5 + breeze2 * 0.5);
+      fgCtx.lineTo(15.2 + breeze, -22.5 + breeze2 * 0.5);
+      fgCtx.lineTo(15.8 + breeze * 0.8, -17 + breeze2 * 0.6);
+      fgCtx.lineTo(12.2 + breeze * 0.7, -21 + breeze2 * 0.5);
+      fgCtx.quadraticCurveTo(12.5, -28, 3.0, -31.2);
+      fgCtx.closePath();
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      // Inner cloth crease lines on the ribbons
+      fgCtx.strokeStyle = '#52525b';
+      fgCtx.lineWidth = 0.85;
+      fgCtx.beginPath();
+      fgCtx.moveTo(4.5, -32.8);
+      fgCtx.quadraticCurveTo(12, -33.5 + breeze2 * 0.3, 15.5 + breeze * 0.8, -26 + breeze2 * 0.4);
+      fgCtx.moveTo(5.2, -30.5);
+      fgCtx.quadraticCurveTo(8.5, -26, 7.2 + breeze * 0.5, -19.5);
+      fgCtx.stroke();
+
+      // =====================================================================
+      // 5. LONG BANDAGE-WRAPPED CYLINDRICAL HILT (GRIP)
+      // =====================================================================
+      fgCtx.fillStyle = '#e4e4e7';
+      fgCtx.strokeStyle = '#18181b';
+      fgCtx.lineWidth = 1.35;
+      fgCtx.beginPath();
+      fgCtx.moveTo(-3.6, -2.2);
+      fgCtx.lineTo(-3.0, -33.5);
+      fgCtx.lineTo(3.0, -33.5);
+      fgCtx.lineTo(3.6, -2.2);
+      fgCtx.closePath();
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      // Left-side cylindrical shading along the bandage grip
+      fgCtx.fillStyle = '#a1a1aa';
+      fgCtx.beginPath();
+      fgCtx.moveTo(-3.4, -2.4);
+      fgCtx.lineTo(-2.8, -33.3);
+      fgCtx.lineTo(-0.6, -33.3);
+      fgCtx.lineTo(-0.8, -2.4);
+      fgCtx.closePath();
+      fgCtx.fill();
+
+      // Crisscross & horizontal cloth bandage wrap lines up the entire grip
+      fgCtx.strokeStyle = '#27272a';
+      fgCtx.lineWidth = 0.95;
+      for (let gy = -4.5; gy >= -32; gy -= 2.6) {
+        fgCtx.beginPath();
+        fgCtx.moveTo(-3.3, gy);
+        fgCtx.quadraticCurveTo(0, gy + 0.9, 3.3, gy - 0.3);
+        fgCtx.stroke();
+      }
+
+      // =====================================================================
+      // 6. FACETED OCTAGONAL POMMEL CAP AT TOP OF HILT
+      // =====================================================================
+      fgCtx.fillStyle = '#d4d4d8';
+      fgCtx.strokeStyle = '#18181b';
+      fgCtx.lineWidth = 1.35;
+      fgCtx.beginPath();
+      fgCtx.moveTo(-3.4, -33.5);
+      fgCtx.lineTo(-4.8, -36.5);
+      fgCtx.lineTo(-4.5, -39.8);
+      fgCtx.lineTo(-3.0, -41.5);
+      fgCtx.lineTo(3.0, -41.5);
+      fgCtx.lineTo(4.5, -39.8);
+      fgCtx.lineTo(4.8, -36.5);
+      fgCtx.lineTo(3.4, -33.5);
+      fgCtx.closePath();
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      // Pommel facet line & highlight rim
+      fgCtx.strokeStyle = '#f4f4f5';
+      fgCtx.lineWidth = 0.95;
+      fgCtx.beginPath();
+      fgCtx.moveTo(-3.8, -39.2);
+      fgCtx.lineTo(3.8, -39.2);
+      fgCtx.stroke();
+
+      fgCtx.restore();
+    }
+
+    function drawCatWritingHUD(note) {
+      const W = window.innerWidth || 360;
+      const boxW = Math.min(268, W - 24);
+      const boxH = 74;
+      const bx = Math.max(12, Math.min(W - boxW - 12, cat.x - boxW / 2));
+      const by = Math.max(12, cat.y - 122);
+
+      fgCtx.save();
+      fgCtx.fillStyle = 'rgba(12, 12, 12, 0.96)';
+      fgCtx.strokeStyle = '#d4d4d4';
+      fgCtx.lineWidth = 1.2;
+      fgCtx.beginPath();
+      fgCtx.roundRect(bx, by, boxW, boxH, 4);
+      fgCtx.fill();
+      fgCtx.stroke();
+
+      fgCtx.font = '10px "JetBrains Mono", monospace';
+      fgCtx.fillStyle = '#9e9e9e';
+      fgCtx.textAlign = 'left';
+      fgCtx.fillText('// CAT WRITING IN DEATH NOTE...', bx + 10, by + 16);
+
+      const stopW = 46;
+      const stopH = 18;
+      const stopX = bx + boxW - stopW - 8;
+      const stopY = by + 6;
+      fgCtx.fillStyle = '#222222';
+      fgCtx.strokeStyle = '#888888';
+      fgCtx.beginPath();
+      fgCtx.roundRect(stopX, stopY, stopW, stopH, 3);
+      fgCtx.fill();
+      fgCtx.stroke();
+      fgCtx.fillStyle = '#ffffff';
+      fgCtx.textAlign = 'center';
+      fgCtx.fillText('[stop]', stopX + stopW / 2, stopY + 12);
+
+      state.cancelButtonBounds = { x: stopX, y: stopY, w: stopW, h: stopH, note };
+
+      const fullLine1 = `name: ${note.targetName}`;
+      const fullLine2 = `cause: ${note.causeText}`;
+      const p1 = Math.min(1, note.writingProgress * 1.55);
+      const p2 = Math.max(0, (note.writingProgress - 0.45) / 0.55);
+
+      const typed1 = fullLine1.slice(0, Math.floor(fullLine1.length * p1));
+      const typed2 = fullLine2.slice(0, Math.floor(fullLine2.length * p2));
+
+      fgCtx.textAlign = 'left';
+      fgCtx.fillStyle = '#ffffff';
+      fgCtx.font = 'bold 10.5px "JetBrains Mono", monospace';
+      fgCtx.fillText(typed1 + (p1 < 1 ? '▋' : ''), bx + 10, by + 35);
+
+      fgCtx.fillStyle = '#b0b0b0';
+      fgCtx.font = '10px "JetBrains Mono", monospace';
+      if (p2 > 0) {
+        fgCtx.fillText(typed2 + (p2 < 1 ? '▋' : ''), bx + 10, by + 51);
+      }
+
+      fgCtx.fillStyle = '#222222';
+      fgCtx.fillRect(bx + 10, by + boxH - 10, boxW - 20, 4);
+      fgCtx.fillStyle = '#ededed';
+      fgCtx.fillRect(bx + 10, by + boxH - 10, (boxW - 20) * Math.min(1, note.writingProgress), 4);
+
+      fgCtx.restore();
+    }
+
+    function drawCatAndForeground(time) {
+      const W = document.documentElement.clientWidth || window.innerWidth || 360;
+      const H = document.documentElement.clientHeight || window.innerHeight || 640;
+      fgCtx.clearRect(0, 0, W, H);
+
+      fgCtx.save();
+      if (state.screenShake > 0.2) {
+        const sx = (Math.random() - 0.5) * state.screenShake;
+        const sy = (Math.random() - 0.5) * state.screenShake;
+        fgCtx.translate(sx, sy);
+        state.screenShake *= 0.84;
+      } else {
+        state.screenShake = 0;
+      }
+
+      // 0.5 Draw Berserk Diagonal Slash Beam & Metallic Sparks
+      for (let i = state.slashBeams.length - 1; i >= 0; i--) {
+        const sb = state.slashBeams[i];
+        sb.alpha -= 0.032;
+        if (sb.alpha <= 0) {
+          state.slashBeams.splice(i, 1);
+          continue;
+        }
+        fgCtx.save();
+        fgCtx.strokeStyle = `rgba(255, 255, 255, ${sb.alpha})`;
+        fgCtx.lineWidth = sb.width * sb.alpha;
+        fgCtx.beginPath();
+        fgCtx.moveTo(sb.x1, sb.y1);
+        fgCtx.lineTo(sb.x2, sb.y2);
+        fgCtx.stroke();
+        fgCtx.restore();
+      }
+
+      for (let i = state.sparks.length - 1; i >= 0; i--) {
+        const sp = state.sparks[i];
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        sp.vy += 0.22;
+        sp.life -= sp.decay;
+        if (sp.life <= 0) {
+          state.sparks.splice(i, 1);
+          continue;
+        }
+        fgCtx.save();
+        fgCtx.strokeStyle = `rgba(244, 244, 245, ${sp.life})`;
+        fgCtx.lineWidth = 1.6;
+        fgCtx.beginPath();
+        fgCtx.moveTo(sp.x, sp.y);
+        fgCtx.lineTo(sp.x - sp.vx * 1.8, sp.y - sp.vy * 1.8);
+        fgCtx.stroke();
+        fgCtx.restore();
+      }
+
+      // 1. Draw Fluttering Death Note Paper Pages
+      for (let i = 0; i < state.paperPages.length; i++) {
+        const p = state.paperPages[i];
+        fgCtx.save();
+        fgCtx.translate(p.x, p.y);
+        fgCtx.rotate(p.angle);
+        fgCtx.fillStyle = `rgba(225, 225, 225, ${p.alpha})`;
+        fgCtx.strokeStyle = `rgba(40, 40, 40, ${p.alpha})`;
+        fgCtx.lineWidth = 1;
+        fgCtx.fillRect(-7, -9, 14, 18);
+        fgCtx.strokeRect(-7, -9, 14, 18);
+        fgCtx.restore();
+      }
+
+      // 2. Draw Fallen Death Notes
+      for (let i = 0; i < state.deathNotes.length; i++) {
+        drawSingleDeathNote(state.deathNotes[i]);
+      }
+
+      // 2.5 Draw Fallen Guts Dragon Slayer Sword (when embedded tip-first in ledge before pickup)
+      if (state.gutsSword && !state.gutsSword.pickedUp) {
+        drawDragonSlayerBlade(state.gutsSword.x, state.gutsSword.y - 68, state.gutsSword.angle, 0.95);
+      }
+
+      // 3. Draw Snacks & Shinigami Apples
+      for (let i = 0; i < state.snacks.length; i++) {
+        const s = state.snacks[i];
+        fgCtx.save();
+        fgCtx.translate(s.x, s.y);
+        if (s.isApple) {
+          fgCtx.fillStyle = '#262626';
+          fgCtx.strokeStyle = '#e5e5e5';
+          fgCtx.lineWidth = 1.4;
+          fgCtx.beginPath();
+          fgCtx.arc(-2.5, 0, 5.5, 0, Math.PI * 2);
+          fgCtx.arc(2.5, 0, 5.5, 0, Math.PI * 2);
+          fgCtx.fill();
+          fgCtx.stroke();
+
+          fgCtx.beginPath();
+          fgCtx.moveTo(0, -4.5);
+          fgCtx.lineTo(1.8, -9);
+          fgCtx.strokeStyle = '#ffffff';
+          fgCtx.lineWidth = 1.3;
+          fgCtx.stroke();
+        } else {
+          fgCtx.fillStyle = '#e5e5e5';
+          fgCtx.beginPath();
+          fgCtx.ellipse(0, 0, 6.5, 3.8, 0, 0, Math.PI * 2);
+          fgCtx.fill();
+          fgCtx.beginPath();
+          fgCtx.moveTo(-5, 0);
+          fgCtx.lineTo(-10, -4.5);
+          fgCtx.lineTo(-10, 4.5);
+          fgCtx.closePath();
+          fgCtx.fill();
+        }
+        fgCtx.restore();
+      }
+
+      // 4. Draw High-Contrast Monochrome Cat Companion
+      if (!cat.inTrash) {
+        sanitizeCat();
+        fgCtx.save();
+
+        const isCatDragged = Boolean(state.dragItem && state.dragItem.type === 'cat' && state.dragItem.moved);
+        const speedMag = Math.hypot(cat.vx, cat.vy);
+        const stretchY = isCatDragged ? 1.18 : 1 + cat.stretchFactor * 0.22;
+        const stretchX = isCatDragged ? 0.92 : 1 - cat.stretchFactor * 0.1 + Math.min(speedMag * 0.02, 0.18);
+
+        fgCtx.translate(cat.x, cat.y);
+        if (isCatDragged) {
+          const swingAngle = Math.max(-0.35, Math.min(0.35, -cat.vx * 0.03));
+          fgCtx.rotate(swingAngle);
+        }
+        fgCtx.scale(stretchX, stretchY);
+
+        // If Guts Mode is active: Draw Flowing Tattered Black Swordsman Cape & Shoulder Sword BEHIND Body/Head
+        if (cat.isGuts) {
+          fgCtx.save();
+          const capeWind = Math.sin(time * 0.012) * 6;
+          fgCtx.beginPath();
+          fgCtx.moveTo(0, -14);
+          fgCtx.lineTo(-cat.facing * (34 + capeWind), 2);
+          fgCtx.lineTo(-cat.facing * (28 - capeWind * 0.4), -7);
+          fgCtx.lineTo(-cat.facing * (38 + capeWind * 0.6), -14);
+          fgCtx.lineTo(-cat.facing * 18, -22);
+          fgCtx.closePath();
+          fgCtx.fillStyle = '#09090b';
+          fgCtx.fill();
+          fgCtx.strokeStyle = '#71717a';
+          fgCtx.lineWidth = 1.5;
+          fgCtx.stroke();
+          fgCtx.restore();
+
+          drawDragonSlayerBlade(-cat.facing * 6, -18, cat.swordAngle, 0.9);
+        }
+
+        // STEP 1: TAIL (Curved bezier tail extending from back of body, wagging using Math.sin(time * 0.005))
+        const tailWag = Math.sin(time * 0.005) * 10;
+        const tailStartX = -cat.facing * 14;
+        const tailStartY = -10;
+        const tailCtrlX = -cat.facing * 28;
+        const tailCtrlY = -15 + tailWag * 0.5;
+        const tailEndX = -cat.facing * 26 + tailWag * 0.6;
+        const tailEndY = -31 + Math.cos(time * 0.005) * 4;
+
+        fgCtx.beginPath();
+        fgCtx.moveTo(tailStartX, tailStartY);
+        fgCtx.quadraticCurveTo(tailCtrlX, tailCtrlY, tailEndX, tailEndY);
+        fgCtx.strokeStyle = '#e4e4e7';
+        fgCtx.lineWidth = 7;
+        fgCtx.lineCap = 'round';
+        fgCtx.stroke();
+
+        fgCtx.beginPath();
+        fgCtx.moveTo(tailStartX, tailStartY);
+        fgCtx.quadraticCurveTo(tailCtrlX, tailCtrlY, tailEndX, tailEndY);
+        fgCtx.strokeStyle = '#18181b';
+        fgCtx.lineWidth = 3.8;
+        fgCtx.lineCap = 'round';
+        fgCtx.stroke();
+
+        // STEP 2: BODY (Rounded oval torso sitting above the ledge at y = -12)
+        fgCtx.beginPath();
+        fgCtx.ellipse(0, -12, 18, 11, 0, 0, Math.PI * 2);
+        fgCtx.fillStyle = '#18181b';
+        fgCtx.fill();
+        fgCtx.strokeStyle = '#e4e4e7';
+        fgCtx.lineWidth = 2.2;
+        fgCtx.stroke();
+
+        // STEP 3: PAWS (Bottom of paws rests directly on y = 0, the 1px top border of .card)
+        const pawBounce1 = (speedMag > 0.5 || isCatDragged) ? Math.sin(cat.walkCycle) * (isCatDragged ? 4.5 : 2.5) : 0;
+        const pawBounce2 = (speedMag > 0.5 || isCatDragged) ? Math.cos(cat.walkCycle) * (isCatDragged ? 4.5 : 2.5) : 0;
+        const pawBaseY = isCatDragged ? 1.5 : -3.8;
+
+        fgCtx.beginPath();
+        fgCtx.arc(cat.facing * 5 - 4, pawBaseY + pawBounce1, 3.8, 0, Math.PI * 2);
+        fgCtx.fillStyle = '#18181b';
+        fgCtx.fill();
+        fgCtx.strokeStyle = '#e4e4e7';
+        fgCtx.lineWidth = 1.8;
+        fgCtx.stroke();
+
+        fgCtx.beginPath();
+        fgCtx.arc(cat.facing * 5 + 5, pawBaseY + pawBounce2, 3.8, 0, Math.PI * 2);
+        fgCtx.fillStyle = '#18181b';
+        fgCtx.fill();
+        fgCtx.strokeStyle = '#e4e4e7';
+        fgCtx.lineWidth = 1.8;
+        fgCtx.stroke();
+
+        // If writing in Death Note, draw tiny quill pen in front paw
+        if (cat.mode === 'writing_note') {
+          const scribbleX = Math.sin(time * 0.045) * 4;
+          const scribbleY = Math.cos(time * 0.06) * 2.5;
+          const pawX = cat.facing * 13 + scribbleX;
+          const pawY = -5 + scribbleY;
+
+          fgCtx.strokeStyle = '#ffffff';
+          fgCtx.lineWidth = 1.8;
+          fgCtx.beginPath();
+          fgCtx.moveTo(pawX, pawY);
+          fgCtx.lineTo(pawX + cat.facing * 9, pawY - 12);
+          fgCtx.stroke();
+        }
+
+        // Head center coordinates (y = -26, r = 13.5, ears up to y = -48)
+        const headBob = cat.mode === 'writing_note' ? Math.sin(time * 0.035) * 1.6 : 0;
+        const headX = cat.facing * 8;
+        const headY = -26 + headBob;
+        const headR = 13.5;
+
+        // STEP 4: COLLAR & TAG (Clean silver collar line and small circular tag between head and body)
+        fgCtx.beginPath();
+        fgCtx.moveTo(headX - 8, headY + 10);
+        fgCtx.quadraticCurveTo(headX, headY + 13, headX + 8, headY + 10);
+        fgCtx.strokeStyle = '#a1a1aa';
+        fgCtx.lineWidth = 2.5;
+        fgCtx.lineCap = 'round';
+        fgCtx.stroke();
+
+        fgCtx.beginPath();
+        fgCtx.arc(headX + cat.facing * 2, headY + 13.5, 2.6, 0, Math.PI * 2);
+        fgCtx.fillStyle = '#d4d4d8';
+        fgCtx.fill();
+
+        // STEP 5: HEAD CIRCLE (Distinct round cat head drawn ON TOP of the front/top of the body)
+        fgCtx.beginPath();
+        fgCtx.arc(headX, headY, headR, 0, Math.PI * 2);
+        fgCtx.fillStyle = '#18181b';
+        fgCtx.fill();
+        fgCtx.strokeStyle = '#e4e4e7';
+        fgCtx.lineWidth = 2.2;
+        fgCtx.stroke();
+
+        // STEP 6: POINTED CAT EARS (Two prominent triangular cat ears rising 12px above the head circle to y = -48)
+        // Left Ear Outer
+        fgCtx.beginPath();
+        fgCtx.moveTo(headX - 11.5, headY - 6);
+        fgCtx.lineTo(headX - 9.5, headY - 22);
+        fgCtx.lineTo(headX - 2, headY - 11.5);
+        fgCtx.closePath();
+        fgCtx.fillStyle = '#18181b';
+        fgCtx.fill();
+        fgCtx.strokeStyle = '#e4e4e7';
+        fgCtx.lineWidth = 2.2;
+        fgCtx.lineJoin = 'round';
+        fgCtx.stroke();
+
+        // Left Ear Inner Triangle
+        fgCtx.beginPath();
+        fgCtx.moveTo(headX - 9.8, headY - 8.5);
+        fgCtx.lineTo(headX - 8.6, headY - 18.5);
+        fgCtx.lineTo(headX - 4, headY - 11.5);
+        fgCtx.closePath();
+        fgCtx.fillStyle = '#52525b';
+        fgCtx.fill();
+
+        // Right Ear Outer
+        fgCtx.beginPath();
+        fgCtx.moveTo(headX + 2, headY - 11.5);
+        fgCtx.lineTo(headX + 9.5, headY - 22);
+        fgCtx.lineTo(headX + 11.5, headY - 6);
+        fgCtx.closePath();
+        fgCtx.fillStyle = '#18181b';
+        fgCtx.fill();
+        fgCtx.strokeStyle = '#e4e4e7';
+        fgCtx.lineWidth = 2.2;
+        fgCtx.lineJoin = 'round';
+        fgCtx.stroke();
+
+        // Right Ear Inner Triangle
+        fgCtx.beginPath();
+        fgCtx.moveTo(headX + 4, headY - 11.5);
+        fgCtx.lineTo(headX + 8.6, headY - 18.5);
+        fgCtx.lineTo(headX + 9.8, headY - 8.5);
+        fgCtx.closePath();
+        fgCtx.fillStyle = '#52525b';
+        fgCtx.fill();
+
+        // STEP 7: FACIAL FEATURES (Eyes, Slit Pupils, Nose, :3 Mouth, Whiskers)
+        const leftEyeX = headX - 4.8 + cat.facing * 1.4;
+        const rightEyeX = headX + 4.8 + cat.facing * 1.4;
+        const eyeY = headY - 1.5;
+
+        if (cat.petSquintTimer > 0) {
+          // Happy "^ ^" squinting eyes when petted
+          fgCtx.strokeStyle = '#ffffff';
+          fgCtx.lineWidth = 2.0;
+          fgCtx.lineCap = 'round';
+
+          fgCtx.beginPath();
+          fgCtx.moveTo(leftEyeX - 3, eyeY + 1);
+          fgCtx.lineTo(leftEyeX, eyeY - 2.2);
+          fgCtx.lineTo(leftEyeX + 3, eyeY + 1);
+          fgCtx.stroke();
+
+          fgCtx.beginPath();
+          fgCtx.moveTo(rightEyeX - 3, eyeY + 1);
+          fgCtx.lineTo(rightEyeX, eyeY - 2.2);
+          fgCtx.lineTo(rightEyeX + 3, eyeY + 1);
+          fgCtx.stroke();
+        } else if (cat.isBlinking) {
+          fgCtx.strokeStyle = '#d4d4d8';
+          fgCtx.lineWidth = 1.8;
+          fgCtx.beginPath();
+          fgCtx.moveTo(leftEyeX - 3, eyeY);
+          fgCtx.lineTo(leftEyeX + 3, eyeY);
+          fgCtx.moveTo(rightEyeX - 3, eyeY);
+          fgCtx.lineTo(rightEyeX + 3, eyeY);
+          fgCtx.stroke();
+        } else {
+          let lookTargetX = state.mouseX;
+          let lookTargetY = state.mouseY;
+          if (state.gutsSword && !state.gutsSword.pickedUp) {
+            lookTargetX = state.gutsSword.x;
+            lookTargetY = state.gutsSword.y;
+          } else if (cat.targetNote) {
+            lookTargetX = cat.targetNote.x;
+            lookTargetY = cat.targetNote.y;
+          }
+
+          const angleToMouse = Math.atan2(lookTargetY - (cat.y + headY), lookTargetX - (cat.x + headX));
+          const pupilOffX = Math.cos(angleToMouse) * 1.1;
+          const pupilOffY = Math.sin(angleToMouse) * 1.1;
+
+          // Left Eye (Always Open)
+          fgCtx.fillStyle = '#ffffff';
+          fgCtx.beginPath();
+          fgCtx.ellipse(leftEyeX, eyeY, 3.2, 3.6, 0, 0, Math.PI * 2);
+          fgCtx.fill();
+
+          fgCtx.fillStyle = '#09090b';
+          fgCtx.beginPath();
+          fgCtx.ellipse(leftEyeX + pupilOffX, eyeY + pupilOffY, 1.1, 2.5, 0, 0, Math.PI * 2);
+          fgCtx.fill();
+
+          // Right Eye (Scarred shut if Guts mode is active, otherwise normal open eye)
+          if (cat.isGuts) {
+            fgCtx.strokeStyle = '#e4e4e7';
+            fgCtx.lineWidth = 1.8;
+            fgCtx.beginPath();
+            fgCtx.moveTo(rightEyeX - 3.2, eyeY);
+            fgCtx.lineTo(rightEyeX + 3.2, eyeY);
+            fgCtx.stroke();
+
+            fgCtx.strokeStyle = '#a1a1aa';
+            fgCtx.lineWidth = 1.3;
+            fgCtx.beginPath();
+            fgCtx.moveTo(rightEyeX - 1, eyeY - 4.5);
+            fgCtx.lineTo(rightEyeX + 1, eyeY + 4.5);
+            fgCtx.stroke();
+          } else {
+            fgCtx.fillStyle = '#ffffff';
+            fgCtx.beginPath();
+            fgCtx.ellipse(rightEyeX, eyeY, 3.2, 3.6, 0, 0, Math.PI * 2);
+            fgCtx.fill();
+
+            fgCtx.fillStyle = '#09090b';
+            fgCtx.beginPath();
+            fgCtx.ellipse(rightEyeX + pupilOffX, eyeY + pupilOffY, 1.1, 2.5, 0, 0, Math.PI * 2);
+            fgCtx.fill();
+          }
+        }
+
+        // Cute Small Triangle Nose & ":3" Cat Mouth
+        const noseX = headX + cat.facing * 1.4;
+        const noseY = headY + 2.8;
+        fgCtx.fillStyle = '#d4d4d8';
+        fgCtx.beginPath();
+        fgCtx.moveTo(noseX - 1.8, noseY - 1);
+        fgCtx.lineTo(noseX + 1.8, noseY - 1);
+        fgCtx.lineTo(noseX, noseY + 1.4);
+        fgCtx.closePath();
+        fgCtx.fill();
+
+        fgCtx.strokeStyle = '#d4d4d8';
+        fgCtx.lineWidth = 1.3;
+        fgCtx.lineCap = 'round';
+        fgCtx.beginPath();
+        fgCtx.moveTo(noseX - 3.2, noseY + 2.6);
+        fgCtx.quadraticCurveTo(noseX - 1.6, noseY + 4.2, noseX, noseY + 2.2);
+        fgCtx.quadraticCurveTo(noseX + 1.6, noseY + 4.2, noseX + 3.2, noseY + 2.6);
+        fgCtx.stroke();
+
+        // 3 Whiskers on Each Side
+        fgCtx.strokeStyle = '#a1a1aa';
+        fgCtx.lineWidth = 1.1;
+        fgCtx.beginPath();
+        // Left whiskers
+        fgCtx.moveTo(headX - 8, headY + 1);
+        fgCtx.lineTo(headX - 16, headY - 1);
+        fgCtx.moveTo(headX - 8, headY + 3.2);
+        fgCtx.lineTo(headX - 16.5, headY + 3.2);
+        fgCtx.moveTo(headX - 8, headY + 5.4);
+        fgCtx.lineTo(headX - 15.5, headY + 7);
+        // Right whiskers
+        fgCtx.moveTo(headX + 8, headY + 1);
+        fgCtx.lineTo(headX + 16, headY - 1);
+        fgCtx.moveTo(headX + 8, headY + 3.2);
+        fgCtx.lineTo(headX + 16.5, headY + 3.2);
+        fgCtx.moveTo(headX + 8, headY + 5.4);
+        fgCtx.lineTo(headX + 15.5, headY + 7);
+        fgCtx.stroke();
+
+        // Berserk Brand of Sacrifice glowing above Guts-Cat
+        if (cat.isGuts) {
+          const bx = headX;
+          const by = headY - 33;
+          fgCtx.save();
+          fgCtx.strokeStyle = '#ffffff';
+          fgCtx.lineWidth = 1.5;
+          fgCtx.beginPath();
+          fgCtx.moveTo(bx, by - 8);
+          fgCtx.lineTo(bx, by + 8);
+          fgCtx.moveTo(bx, by + 6);
+          fgCtx.lineTo(bx - 5, by);
+          fgCtx.lineTo(bx, by - 5);
+          fgCtx.lineTo(bx + 5, by);
+          fgCtx.closePath();
+          fgCtx.moveTo(bx - 4, by - 8);
+          fgCtx.lineTo(bx, by - 5);
+          fgCtx.lineTo(bx + 4, by - 8);
+          fgCtx.stroke();
+          fgCtx.restore();
+        }
+
+        // Alert "!" or Floating Prompt Above Cat (floats cleanly above ears at y = -62)
+        if (cat.alertTimer > 0) {
+          fgCtx.font = 'bold 13px "JetBrains Mono", monospace';
+          fgCtx.fillStyle = '#ffffff';
+          fgCtx.textAlign = 'center';
+          fgCtx.fillText('!', headX, -60);
+        } else if (!cat.hasNotifiedPet && cat.mode === 'perched' && !cat.targetNote && !cat.isGuts && time > 1200) {
+          const floatY = Math.sin(time * 0.004) * 2.5;
+          fgCtx.font = '10px "JetBrains Mono", monospace';
+          fgCtx.fillStyle = '#d4d4d4';
+          fgCtx.textAlign = 'center';
+          fgCtx.fillText('meow (tap or drag)', headX, -62 + floatY);
+        }
+
+        if (cat.petSquintTimer > 0) {
+          cat.purrWave += 0.08;
+          fgCtx.font = '10px "JetBrains Mono", monospace';
+          fgCtx.fillStyle = '#e5e5e5';
+          fgCtx.textAlign = 'center';
+          fgCtx.fillText('*purr*', headX, -60 - (45 - cat.petSquintTimer) * 0.35);
+        }
+
+        fgCtx.restore();
+      }
+
+      // 5. If Cat is Writing in the Death Note, Draw Live Magnified Notebook HUD
+      if (cat.mode === 'writing_note' && cat.targetNote && !cat.inTrash) {
+        drawCatWritingHUD(cat.targetNote);
+      } else {
+        state.cancelButtonBounds = null;
+      }
+
+      // 6. Draw Floating Text Reactions
+      for (let i = state.floatingTexts.length - 1; i >= 0; i--) {
+        const ft = state.floatingTexts[i];
+        ft.y += ft.vy;
+        ft.alpha -= 0.015;
+        if (ft.alpha <= 0) {
+          state.floatingTexts.splice(i, 1);
+          continue;
+        }
+        fgCtx.save();
+        fgCtx.font = '11px "JetBrains Mono", monospace';
+        fgCtx.textAlign = 'center';
+        fgCtx.fillStyle = `rgba(240, 240, 240, ${ft.alpha})`;
+        fgCtx.fillText(ft.text, ft.x, ft.y);
+        fgCtx.restore();
+      }
+
+      // 7. Draw Laser Pointer Dot if Active
+      if (state.laserMode && state.mouseActive) {
+        fgCtx.save();
+        fgCtx.beginPath();
+        fgCtx.arc(state.mouseX, state.mouseY, 10, 0, Math.PI * 2);
+        fgCtx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+        fgCtx.fill();
+
+        fgCtx.beginPath();
+        fgCtx.arc(state.mouseX, state.mouseY, 3.5, 0, Math.PI * 2);
+        fgCtx.fillStyle = '#ffffff';
+        fgCtx.fill();
+        fgCtx.restore();
+      }
+
+      // 8. Screen Flash Overlay
+      if (state.screenFlashAlpha > 0.01) {
+        fgCtx.save();
+        fgCtx.fillStyle = `rgba(255, 255, 255, ${state.screenFlashAlpha})`;
+        fgCtx.fillRect(0, 0, W, H);
+        fgCtx.restore();
+        state.screenFlashAlpha *= 0.88;
+      }
+
+      fgCtx.restore();
+    }
+
+    /* =========================================================================
+       INTERACTIONS: PETTING, SNACKS, LASER, WORLDLINE SHIFT
+       ========================================================================= */
+    function petCat() {
+      cat.hasNotifiedPet = true;
+      cat.petSquintTimer = 45;
+      cat.stretchFactor = 1.0;
+      playSoftChirp();
+      spawnRipple(cat.x, cat.y - 10, 14);
+    }
+
+    function toggleLaser(forceState) {
+      state.laserMode = typeof forceState === 'boolean' ? forceState : !state.laserMode;
+      const btn = document.getElementById('laser-btn');
+      const label = document.getElementById('laser-label');
+      const dot = document.getElementById('laser-dot');
+
+      if (state.laserMode) {
+        document.body.classList.add('laser-active');
+        btn.classList.add('active-toggle');
+        label.textContent = 'laser: on';
+        dot.style.backgroundColor = '#0a0a0a';
+      } else {
+        document.body.classList.remove('laser-active');
+        btn.classList.remove('active-toggle');
+        label.textContent = 'laser: off';
+        dot.style.backgroundColor = '#666666';
+      }
+      playClickTick(state.laserMode ? 480 : 240);
+    }
+
+    function feedCatFish() {
+      const W = window.innerWidth || 360;
+      const cardRect = cardEl.getBoundingClientRect();
+      const perchY = getLedgeY();
+      const minX = Math.max(40, cardRect.left + 24);
+      const maxX = Math.min(W - 40, cardRect.right - 24);
+      const spawnX = minX + Math.random() * Math.max(40, maxX - minX);
+      const isApple = Math.random() < 0.48;
+
+      state.snacks.push({
+        x: spawnX,
+        y: Math.max(16, perchY - 95),
+        targetY: perchY - 5,
+        vy: 0,
+        isApple
+      });
+      playClickTick(390);
+    }
+
+    const coordsLabel = document.getElementById('coords-label');
+
+    function updatePointerState(pt) {
+      state.prevMouseX = state.mouseX;
+      state.prevMouseY = state.mouseY;
+      state.mouseX = pt.x;
+      state.mouseY = pt.y;
+      state.mouseActive = true;
+
+      if (coordsLabel) {
+        const xStr = String(Math.round(pt.x)).padStart(3, '0');
+        const yStr = String(Math.round(pt.y)).padStart(3, '0');
+        coordsLabel.textContent = `${xStr}, ${yStr}`;
+      }
+    }
+
+    /* =========================================================================
+       4. UNIFIED MOBILE TOUCH & POINTER INTERACTIONS (ZERO NaN GUARANTEED)
+       ========================================================================= */
+    let dragStartPos = { x: 0, y: 0 };
+
+    function bindFastButton(btnId, handler) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      let touchedRecently = false;
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        touchedRecently = true;
+        setTimeout(() => { touchedRecently = false; }, 400);
+        handler();
+      }, { passive: false });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (touchedRecently) return;
+        handler();
+      });
+    }
+
+    bindFastButton('drop-snack-btn', () => feedCatFish());
+    bindFastButton('laser-btn', () => toggleLaser());
+    bindFastButton('spare-me-btn', () => cancelCatWriting(null));
+    bindFastButton('retry-redirect-btn', () => {
+      if (document.referrer) {
+        try { window.location.href = document.referrer; return; } catch (e) {}
+      }
+      try {
+        window.history.back();
+      } catch (e) {}
+    });
+    bindFastButton('respawn-btn', () => {
+      const overlay = document.getElementById('redirect-overlay');
+      if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+      }
+      state.redirectTriggered = false;
+      updateSpareButtonVisibility();
+      spawnFloatingText(cat.x, cat.y - 32, 'respawned on site');
     });
 
+    function handleMoveInteraction(pt, rawEvent) {
+      updatePointerState(pt);
+
+      if (!state.dragItem) return;
+
+      const distMoved = Math.hypot(pt.x - dragStartPos.x, pt.y - dragStartPos.y);
+      if (!state.dragItem.moved && distMoved > 8) {
+        state.dragItem.moved = true;
+        if (state.dragItem.type === 'cat') {
+          playSoftChirp();
+          spawnFloatingText(cat.x, cat.y - 38, 'put me down!!');
+        }
+      }
+
+      if (state.dragItem.moved || state.dragItem.type !== 'cat') {
+        if (rawEvent && rawEvent.cancelable) {
+          rawEvent.preventDefault();
+        }
+        const nearTrash = isNearTrashZone(pt.x, pt.y);
+        updateTrashZoneUI(true, nearTrash);
+      }
+    }
+
+    window.addEventListener('pointermove', (e) => {
+      handleMoveInteraction(getPoint(e), e);
+    }, { passive: false });
+
     window.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) {
-        state.mouseX = e.touches[0].clientX;
-        state.mouseY = e.touches[0].clientY;
+      handleMoveInteraction(getPoint(e), e);
+    }, { passive: false });
+
+    window.addEventListener('pointerdown', (e) => {
+      const pt = getPoint(e);
+      updatePointerState(pt);
+
+      if (e.target && e.target.closest('button, a, input, form, #top-cli')) return;
+
+      dragStartPos = { x: pt.x, y: pt.y };
+
+      // 0. Check if user tapped the [stop] cancel button on the floating Death Note HUD
+      if (state.cancelButtonBounds) {
+        const b = state.cancelButtonBounds;
+        if (
+          pt.x >= b.x - 10 &&
+          pt.x <= b.x + b.w + 10 &&
+          pt.y >= b.y - 10 &&
+          pt.y <= b.y + b.h + 10
+        ) {
+          cancelCatWriting(b.note);
+          return;
+        }
       }
-    }, { passive: true });
 
-    window.addEventListener('mousedown', (e) => {
-      state.mouseX = e.clientX;
-      state.mouseY = e.clientY;
-
-      // Check if user clicked directly on the cat
-      const distToCat = Math.hypot(e.clientX - cat.x, e.clientY - (cat.y - 12));
-      if (distToCat < 32) {
-        petCat();
-        return;
+      // 1. Check if user grabbed a Death Note book on the foreground canvas
+      for (let i = state.deathNotes.length - 1; i >= 0; i--) {
+        const n = state.deathNotes[i];
+        if (Math.hypot(pt.x - n.x, pt.y - n.y) < 44) {
+          state.draggedNote = n;
+          state.dragItem = { type: 'note', ref: n, moved: false };
+          updateTrashZoneUI(true, isNearTrashZone(pt.x, pt.y));
+          playClickTick(210);
+          return;
+        }
       }
 
-      // If clicked outside the main card, emit an ASCII grid ripple wave
+      // 2. Check if user grabbed Guts' Dragon Slayer sword on the ledge
+      if (state.gutsSword && !state.gutsSword.pickedUp) {
+        const sw = state.gutsSword;
+        if (Math.abs(pt.x - sw.x) < 34 && pt.y >= sw.y - 112 && pt.y <= sw.y + 18) {
+          state.dragItem = { type: 'sword', ref: sw, moved: true };
+          updateTrashZoneUI(true, isNearTrashZone(pt.x, pt.y));
+          playClickTick(175);
+          spawnFloatingText(sw.x, sw.y - 85, 'grabbed dragon slayer');
+          return;
+        }
+      }
+
+      // 3. Check if user grabbed a dropped snack / apple
+      for (let i = state.snacks.length - 1; i >= 0; i--) {
+        const s = state.snacks[i];
+        if (Math.hypot(pt.x - s.x, pt.y - s.y) < 30) {
+          state.dragItem = { type: 'snack', ref: s, moved: true };
+          updateTrashZoneUI(true, isNearTrashZone(pt.x, pt.y));
+          playClickTick(240);
+          return;
+        }
+      }
+
+      // 4. Check if user tapped or started dragging the Cat
+      if (!cat.inTrash) {
+        const distToCat = Math.hypot(pt.x - cat.x, pt.y - (cat.y - 20));
+        if (distToCat < 44) {
+          state.dragItem = { type: 'cat', ref: cat, moved: false };
+          return;
+        }
+      }
+
+      // 5. Clicking/tapping outside the card creates a subtle monochrome ASCII dot ripple
       const cardRect = cardEl.getBoundingClientRect();
       const insideCard =
-        e.clientX >= cardRect.left &&
-        e.clientX <= cardRect.right &&
-        e.clientY >= cardRect.top &&
-        e.clientY <= cardRect.bottom;
+        pt.x >= cardRect.left &&
+        pt.x <= cardRect.right &&
+        pt.y >= cardRect.top &&
+        pt.y <= cardRect.bottom;
 
       if (!insideCard) {
-        spawnRipple(e.clientX, e.clientY, 16);
+        spawnRipple(pt.x, pt.y, 16);
         playClickTick(140);
       }
     });
 
-    function petCat() {
-      if (cat.mode === 'napping') {
-        cat.mode = 'perched';
+    function finishDragInteraction(e) {
+      const pt = getPoint(e);
+      if (!state.dragItem) return;
+
+      const dragged = state.dragItem;
+      const draggedDist = Math.hypot(pt.x - dragStartPos.x, pt.y - dragStartPos.y);
+      const droppedInTrash = (dragged.moved || dragged.type !== 'cat') && isNearTrashZone(pt.x, pt.y);
+
+      state.dragItem = null;
+      state.draggedNote = null;
+      updateTrashZoneUI(false, false);
+
+      if (droppedInTrash) {
+        handleTrashDrop(dragged);
+        return;
       }
-      state.petCount++;
-      document.getElementById('pet-count-label').textContent = `pets: ${state.petCount}`;
-      cat.petSquintTimer = 55;
-      cat.stretchFactor = 1.0;
-      playPurrSynth();
-      spawnRipple(cat.x, cat.y, 9);
-    }
 
-    function toggleLaser() {
-      state.laserActive = !state.laserActive;
-      const btn = document.getElementById('laser-btn');
-      const btnText = document.getElementById('laser-btn-text');
-      const dot = document.getElementById('laser-dot-indicator');
-
-      if (state.laserActive) {
-        if (cat.mode === 'napping') {
-          cat.mode = 'chasing';
+      if (dragged.type === 'cat') {
+        if (!dragged.moved && draggedDist <= 8) {
+          petCat();
+        } else {
+          cat.mode = 'returning';
+          playClickTick(200);
         }
-        document.body.classList.add('laser-active');
-        btn.classList.add('active');
-        btnText.textContent = 'laser: on';
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-[#0a0a0a]';
-        playSoftChirp();
-      } else {
-        document.body.classList.remove('laser-active');
-        btn.classList.remove('active');
-        btnText.textContent = 'laser: off';
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-[#737373]';
-        playClickTick(220);
-      }
-    }
-
-    function feedCatFish() {
-      const rect = cardEl.getBoundingClientRect();
-      // Drop a snack from above onto a random spot along the top edge of the card
-      const snackX = rect.left + 30 + Math.random() * (rect.width - 120);
-      const snackY = rect.top - 45;
-      state.snacks.push({ x: snackX, y: snackY, targetY: rect.top, vy: 0 });
-      if (cat.mode === 'napping') {
-        cat.mode = 'perched';
-      }
-      playSoftChirp();
-      spawnRipple(snackX, rect.top, 8);
-    }
-
-    function toggleAudio() {
-      state.sfxEnabled = !state.sfxEnabled;
-      const btn = document.getElementById('audio-btn');
-      btn.textContent = state.sfxEnabled ? 'sfx: on' : 'sfx: off';
-      if (state.sfxEnabled) playClickTick(260);
-    }
-
-    // Clipboard copy with inline status confirmation
-    const copyTimers = {};
-    function copyHandle(text, statusElementId) {
-      const el = document.getElementById(statusElementId);
-      const doFeedback = () => {
-        playClickTick(320);
-        el.textContent = '[copied]';
-        el.style.color = '#e5e5e5';
-        el.style.borderColor = '#525252';
-        clearTimeout(copyTimers[statusElementId]);
-        copyTimers[statusElementId] = setTimeout(() => {
-          el.textContent = '[copy]';
-          el.style.color = '';
-          el.style.borderColor = '';
-        }, 1600);
-      };
-
-      const temp = document.createElement('textarea');
-      temp.value = text;
-      temp.style.position = 'fixed';
-      temp.style.opacity = '0';
-      document.body.appendChild(temp);
-      temp.select();
-      try {
-        document.execCommand('copy');
-        doFeedback();
-      } catch (err) {
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(text).then(doFeedback);
+      } else if (dragged.type === 'note') {
+        const note = dragged.ref;
+        if (draggedDist < 12) {
+          kickOrFlipNote(note);
+        } else {
+          note.vx = Math.max(-12, Math.min(12, (pt.x - state.prevMouseX) * 0.8));
+          note.vy = Math.max(-12, Math.min(12, (pt.y - state.prevMouseY) * 0.8));
+          note.vAngle = (Math.random() - 0.5) * 0.16;
+          note.rested = false;
+          spawnFlutterPages(note.x, note.y, 2);
         }
+      } else if (dragged.type === 'sword') {
+        const sw = dragged.ref;
+        sw.rested = false;
+        sw.vy = 4.5;
+      } else if (dragged.type === 'snack') {
+        const s = dragged.ref;
+        s.targetY = getLedgeY();
+        s.vy = 1.5;
       }
-      document.body.removeChild(temp);
     }
 
-    // Live 24-hour clock
-    function updateClock() {
-      const now = new Date();
-      const hrs = String(now.getHours()).padStart(2, '0');
-      const mins = String(now.getMinutes()).padStart(2, '0');
-      const secs = String(now.getSeconds()).padStart(2, '0');
-      document.getElementById('clock-label').textContent = `${hrs}:${mins}:${secs}`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+    window.addEventListener('pointerup', finishDragInteraction);
+    window.addEventListener('pointercancel', finishDragInteraction);
 
     window.addEventListener('resize', () => {
       initGrid();
-      initCat();
+      syncPositionsWithCardLedge();
     });
 
+    if (typeof ResizeObserver !== 'undefined' && cardEl) {
+      const ro = new ResizeObserver(() => {
+        syncPositionsWithCardLedge();
+      });
+      ro.observe(cardEl);
+      ro.observe(document.body);
+    }
+
     /* =========================================================================
-       MAIN ANIMATION LOOP
+       AUTOMATIC BACKGROUND RANDOM EVENT SCHEDULER (DEATH NOTE & GUTS SWORD)
+       ========================================================================= */
+    function isSceneBusyForRandomEvent() {
+      if (state.redirectTriggered || state.cardSliced || cat.inTrash || state.dragItem) return true;
+      if (!state.unbreakableMode) {
+        if (state.gutsSword) return true;
+        const activeNote = state.deathNotes.some((n) => !n.written && !n.cancelled);
+        if (activeNote) return true;
+        if (cat.mode !== 'perched' && cat.mode !== 'returning') return true;
+      }
+      return false;
+    }
+
+    /* =========================================================================
+       TOP-RIGHT COMMAND LINE INTERFACE (NOBREAK / LOCKDOWN MODE)
+       ========================================================================= */
+    const cliForm = document.getElementById('cli-form');
+    const cliInput = document.getElementById('cli-input');
+    const cliOutput = document.getElementById('cli-output');
+    const cliModeDot = document.getElementById('cli-mode-dot');
+    const cliQuickNobreak = document.getElementById('cli-quick-nobreak');
+    const cliHelpBtn = document.getElementById('cli-help-btn');
+
+    function logCli(msg, highlight = false) {
+      if (!cliOutput) return;
+      cliOutput.classList.remove('hidden');
+      const line = document.createElement('div');
+      line.className = highlight ? 'text-[#ededed]' : 'text-[#8a8a8a]';
+      line.textContent = msg;
+      cliOutput.appendChild(line);
+      while (cliOutput.children.length > 5) {
+        cliOutput.removeChild(cliOutput.firstChild);
+      }
+      cliOutput.scrollTop = cliOutput.scrollHeight;
+    }
+
+    function setUnbreakableMode(enable) {
+      state.unbreakableMode = typeof enable === 'boolean' ? enable : !state.unbreakableMode;
+
+      if (state.unbreakableMode) {
+        if (state.cardSliced) {
+          repairSlicedCard();
+        }
+        // Stop any active Death Note writing & Guts sword slash, but keep items on the ledge
+        state.deathNotes.forEach((n) => {
+          if (!n.written) {
+            n.isOpen = false;
+            n.writingProgress = 0;
+          }
+        });
+        cat.targetNote = null;
+        cat.isGuts = false;
+        if (state.gutsSword && state.gutsSword.pickedUp) {
+          state.gutsSword.pickedUp = false;
+          state.gutsSword.rested = true;
+          state.gutsSword.y = getLedgeY() - 8;
+        }
+        if (
+          cat.mode === 'running_to_note' ||
+          cat.mode === 'writing_note' ||
+          cat.mode === 'running_to_sword' ||
+          cat.mode === 'guts_charging' ||
+          cat.mode === 'guts_slashing'
+        ) {
+          cat.mode = 'returning';
+        }
+        state.cancelButtonBounds = null;
+        updateSpareButtonVisibility();
+
+        if (cliModeDot) cliModeDot.style.backgroundColor = '#ffffff';
+        if (cliQuickNobreak) {
+          cliQuickNobreak.textContent = 'nobreak: on';
+          cliQuickNobreak.classList.add('text-white', 'border-[#777]');
+        }
+        playClickTick(520);
+        spawnFloatingText(cat.x, cat.y - 42, 'nobreak: ON (spawns active, cat chill)');
+        logCli('[ok] nobreak: ON — items still spawn, cat ignores them & card locked.', true);
+      } else {
+        if (cliModeDot) cliModeDot.style.backgroundColor = '#666666';
+        if (cliQuickNobreak) {
+          cliQuickNobreak.textContent = 'nobreak';
+          cliQuickNobreak.classList.remove('text-white', 'border-[#777]');
+        }
+        playClickTick(260);
+        spawnFloatingText(cat.x, cat.y - 42, 'nobreak: OFF (chaos restored)');
+        logCli('[ok] nobreak: OFF — random events & pickups active.', false);
+      }
+      scheduleNextRandomEvent(5500);
+    }
+
+    function runCliCommand(raw) {
+      const cmd = raw.trim().toLowerCase();
+      if (!cmd) return;
+
+      if (
+        cmd === 'nobreak' ||
+        cmd === 'lockdown' ||
+        cmd === 'pacifist' ||
+        cmd === 'chill' ||
+        cmd === 'safe' ||
+        cmd === 'peace'
+      ) {
+        setUnbreakableMode();
+      } else if (cmd === 'nobreak on' || cmd === 'lockdown on' || cmd === 'safe on') {
+        setUnbreakableMode(true);
+      } else if (cmd === 'nobreak off' || cmd === 'lockdown off' || cmd === 'safe off') {
+        setUnbreakableMode(false);
+      } else if (cmd === 'help' || cmd === '?') {
+        logCli('cmds: nobreak | sword | note | repair | clear', true);
+      } else if (cmd === 'sword') {
+        dropGutsSword();
+        logCli(state.unbreakableMode ? 'dropped sword (cat ignoring it).' : 'dropped dragon slayer.');
+      } else if (cmd === 'note') {
+        dropDeathNote();
+        logCli(state.unbreakableMode ? 'dropped note (cat ignoring it).' : 'dropped death note.');
+      } else if (cmd === 'repair') {
+        repairSlicedCard();
+        logCli('card repaired.');
+      } else if (cmd === 'clear' || cmd === 'cls') {
+        if (cliOutput) {
+          cliOutput.innerHTML = '';
+          cliOutput.classList.add('hidden');
+        }
+      } else {
+        logCli(`unknown: "${cmd}" (try: nobreak, help)`);
+      }
+    }
+
+    if (cliForm && cliInput) {
+      cliForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = cliInput.value;
+        cliInput.value = '';
+        runCliCommand(val);
+      });
+    }
+
+    bindFastButton('cli-quick-nobreak', () => setUnbreakableMode());
+    bindFastButton('cli-help-btn', () => runCliCommand('help'));
+
+    function scheduleNextRandomEvent(initialDelayMs) {
+      clearTimeout(state.randomEventTimer);
+      const delay = typeof initialDelayMs === 'number'
+        ? initialDelayMs
+        : 14000 + Math.random() * 8000;
+
+      state.randomEventTimer = setTimeout(() => {
+        if (isSceneBusyForRandomEvent()) {
+          scheduleNextRandomEvent(4000);
+          return;
+        }
+
+        let pickSword;
+        if (state.lastRandomEvent === 'sword') {
+          pickSword = false;
+        } else if (state.lastRandomEvent === 'note') {
+          pickSword = true;
+        } else {
+          pickSword = true;
+        }
+
+        if (pickSword) {
+          state.lastRandomEvent = 'sword';
+          dropGutsSword();
+        } else {
+          state.lastRandomEvent = 'note';
+          dropDeathNote();
+        }
+
+        scheduleNextRandomEvent();
+      }, delay);
+    }
+
+    /* =========================================================================
+       5. MAIN ANIMATION LOOP
        ========================================================================= */
     function animate(time) {
-      updateAndDrawGrid();
-      updateCatPhysics(time);
-      drawCatAndOverlay(time);
+      syncPositionsWithCardLedge();
+      drawBackgroundGrid();
+      updateDeathNotesPhysics();
+      updateGutsSwordPhysics();
+      updateCatPhysics(time || 0);
+      drawCatAndForeground(time || 0);
       requestAnimationFrame(animate);
     }
 
-    window.onload = () => {
+    window.onload = function () {
       initGrid();
       initCat();
       requestAnimationFrame(animate);
+      scheduleNextRandomEvent(4500 + Math.random() * 3000);
     };
   </script>
 </body>
