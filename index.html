@@ -1942,10 +1942,6 @@
     }
 
     function drawDragonSlayerBlade(x, y, angle, scale = 1) {
-      const now = performance.now();
-      const breeze = Math.sin(now * 0.005) * 2.2;
-      const breeze2 = Math.cos(now * 0.0065) * 2.6;
-
       fgCtx.save();
       fgCtx.translate(x, y);
       fgCtx.rotate(angle);
@@ -2084,53 +2080,7 @@
       fgCtx.strokeRect(-4.2, -2.2, 8.4, 2.2);
 
       // =====================================================================
-      // 4. FLOWING TATTERED CLOTH BANDAGE RIBBONS (TIED BELOW POMMEL)
-      // =====================================================================
-      // Lower ribbon tail
-      fgCtx.fillStyle = '#e4e4e7';
-      fgCtx.strokeStyle = '#18181b';
-      fgCtx.lineWidth = 1.25;
-      fgCtx.beginPath();
-      fgCtx.moveTo(2.8, -32);
-      fgCtx.quadraticCurveTo(10, -29 + breeze * 0.4, 10.5 + breeze * 0.7, -19);
-      fgCtx.lineTo(7.5 + breeze * 0.6, -15.5);
-      fgCtx.lineTo(6.2 + breeze * 0.5, -19.5);
-      fgCtx.lineTo(4.0 + breeze * 0.5, -16.5);
-      fgCtx.quadraticCurveTo(6.8, -25, 2.4, -30);
-      fgCtx.closePath();
-      fgCtx.fill();
-      fgCtx.stroke();
-
-      // Upper wide tattered cloth ribbon
-      fgCtx.fillStyle = '#f4f4f5';
-      fgCtx.strokeStyle = '#18181b';
-      fgCtx.lineWidth = 1.25;
-      fgCtx.beginPath();
-      fgCtx.moveTo(3.0, -33.5);
-      fgCtx.quadraticCurveTo(13, -37 + breeze2 * 0.5, 21 + breeze, -28 + breeze2 * 0.6);
-      // Jagged tattered cloth notches matching reference drawing
-      fgCtx.lineTo(18.5 + breeze, -26.5 + breeze2 * 0.5);
-      fgCtx.lineTo(17.5 + breeze, -23.5 + breeze2 * 0.5);
-      fgCtx.lineTo(15.2 + breeze, -22.5 + breeze2 * 0.5);
-      fgCtx.lineTo(15.8 + breeze * 0.8, -17 + breeze2 * 0.6);
-      fgCtx.lineTo(12.2 + breeze * 0.7, -21 + breeze2 * 0.5);
-      fgCtx.quadraticCurveTo(12.5, -28, 3.0, -31.2);
-      fgCtx.closePath();
-      fgCtx.fill();
-      fgCtx.stroke();
-
-      // Inner cloth crease lines on the ribbons
-      fgCtx.strokeStyle = '#52525b';
-      fgCtx.lineWidth = 0.85;
-      fgCtx.beginPath();
-      fgCtx.moveTo(4.5, -32.8);
-      fgCtx.quadraticCurveTo(12, -33.5 + breeze2 * 0.3, 15.5 + breeze * 0.8, -26 + breeze2 * 0.4);
-      fgCtx.moveTo(5.2, -30.5);
-      fgCtx.quadraticCurveTo(8.5, -26, 7.2 + breeze * 0.5, -19.5);
-      fgCtx.stroke();
-
-      // =====================================================================
-      // 5. LONG BANDAGE-WRAPPED CYLINDRICAL HILT (GRIP)
+      // 4. LONG BANDAGE-WRAPPED CYLINDRICAL HILT (GRIP)
       // =====================================================================
       fgCtx.fillStyle = '#e4e4e7';
       fgCtx.strokeStyle = '#18181b';
